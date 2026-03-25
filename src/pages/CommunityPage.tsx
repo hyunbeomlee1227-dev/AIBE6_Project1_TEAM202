@@ -43,6 +43,7 @@ export const CommunityPage: React.FC = () => {
 
     const filteredPosts = activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.type === activeFilter) // 출력할 게시물 목록 (전체 또는 선택한 필터에 따라)
 
+    // 좋아요 수 증가 구현 함수
     const handleLikeClick = (postId: string) => {
         if (!isAuthenticated) {
             setIsLoginModalOpen(true)
