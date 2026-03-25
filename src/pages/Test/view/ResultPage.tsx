@@ -4,9 +4,10 @@ import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PlaceCard } from '../../../components/shared/PlaceCard'
+import { PlaceCard } from '../../../components/Shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { Gemini_API_KEY } from '../../../data/apikey'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
 import createPlacecPrompt from '../../../data/prompt'
 
@@ -20,7 +21,7 @@ export const ResultPage: React.FC = () => {
             contents: prompt,
         })
 
-        if (result !== undefined) return console.log(result.text)
+        if (result !== undefined) return result.text
         else return console.log('AI 응답 실패')
     }
 
@@ -37,7 +38,7 @@ export const ResultPage: React.FC = () => {
 
     if (!result) return null
 
-    requestGemini(result.title)
+    const answer = requestGemini(result.title)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
