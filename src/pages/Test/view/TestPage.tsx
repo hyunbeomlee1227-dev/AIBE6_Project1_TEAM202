@@ -2,10 +2,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card } from '../components/ui/Card'
-import { ProgressBar } from '../components/ui/ProgressBar'
-import { questions, TravelType } from '../data/mockData'
-
+import { Card } from '../../../components/ui/Card'
+import { questions, TravelType } from '../../../data/mockData'
+import { ProgressBar } from '../component/ProgressBar'
 //리엑트 함수형 컴포넌트 선언
 export const TestPage: React.FC = () => {
     const navigate = useNavigate()
@@ -30,7 +29,6 @@ export const TestPage: React.FC = () => {
                 },
                 {} as Record<TravelType, number>,
             )
-
             //가장 많은 답변을 가진 여행 타입 찾기(결과 공유하기 로직)
             const resultType = Object.keys(counts).reduce((a, b) =>
                 counts[a as TravelType] > counts[b as TravelType] ? a : b,
@@ -65,10 +63,8 @@ export const TestPage: React.FC = () => {
             opacity: 0,
         }),
     }
-
     return (
         <div className="min-h-full bg-background flex flex-col pt-6 px-6 pb-12">
-            {/* 상단 헤더: 뒤로가기 & 진행 바 */}
             <div className="flex items-center mb-6">
                 <button onClick={handleBack} className="p-2 -ml-2 text-text-muted hover:text-text transition-colors">
                     <ChevronLeftIcon className="w-6 h-6" />
@@ -78,7 +74,7 @@ export const TestPage: React.FC = () => {
                 </div>
                 <div className="w-10" /> {/* Spacer for balance */}
             </div>
-            {/* 메인 영역: 질문 카드 및 답변 선택지 */}
+
             <div className="flex-1 relative flex flex-col justify-center">
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
@@ -95,12 +91,10 @@ export const TestPage: React.FC = () => {
                         }}
                         className="w-full"
                     >
-                        {/* 질문 텍스트 */}
                         <h2 className="text-2xl font-bold text-text mb-10 text-center text-balance leading-relaxed">
                             {currentQuestion.text}
                         </h2>
 
-                        {/* 답변 선택지 */}
                         <div className="space-y-4">
                             {currentQuestion.options.map((option, idx) => (
                                 <Card

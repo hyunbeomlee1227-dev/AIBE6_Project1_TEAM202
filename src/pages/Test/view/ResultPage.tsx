@@ -2,10 +2,10 @@ import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PlaceCard } from '../components/PlaceCard'
-import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
-import { places, resultTypes, TravelType } from '../data/mockData'
+import { PlaceCard } from '../../../components/shared/PlaceCard'
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
+import { places, resultTypes, TravelType } from '../../../data/mockData'
 export const ResultPage: React.FC = () => {
     // 1. URL 경로에서 결과 타입 추출 (예: /result/activity -> type은 'activity')
     const { type } = useParams<{
