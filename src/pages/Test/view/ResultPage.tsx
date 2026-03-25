@@ -155,7 +155,7 @@ export const ResultPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-text">이런 곳은 어때요?</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
                         {recommendedPlaces!.map((map, index) => (
                             <KakaoMap key={`${map.name}-${index}`} name={map.name} />
                         ))}

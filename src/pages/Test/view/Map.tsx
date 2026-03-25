@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk'
 
 declare global {
     interface Window {
@@ -11,152 +12,134 @@ interface KakaoMapProps {
     name: string
 }
 
-interface Place {
+interface PlaceType {
     place_name: string
     address_name: string
-    road_address_name?: string
+    road_address_name: string
     phone: string
     x: string
     y: string
 }
 
-interface Pagination {
-    last: number
-    current: number
-    gotoPage(page: number): void
-}
-
 export default function KakaoMap({ name }: KakaoMapProps) {
-    const mapRef = useRef<HTMLDivElement | null>(null)
-    const mapInstance = useRef<kakao.maps.Map | null>(null)
-    const infowindowRef = useRef<kakao.maps.InfoWindow | null>(null)
-    const markersRef = useRef<kakao.maps.Marker[]>([])
-    const [places, setPlaces] = useState<Place[]>([])
+    const [map, setMap] = useState<kakao.maps.Map | null>(null)
+    const [places, setPlaces] = useState<PlaceType[]>([])
+    const [selected, setSelected] = useState<PlaceType | null>(null)
+
+    const [loading, error] = useKakaoLoader({
+        appkey: import.meta.env.VITE_KAKAO_API_KEY,
+        libraries: ['services'],
+    })
 
     useEffect(() => {
-        if (!mapRef.current) return
-        const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_API_KEY
+        if (!map || loading) return
 
-        if (window.kakao && window.kakao.maps) {
-            initMap()
-            return
-        }
+        const ps = new window.kakao.maps.services.Places()
 
-        const script = document.createElement('script')
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&autoload=false&libraries=services`
-        script.async = true
-        document.head.appendChild(script)
+        ps.keywordSearch(name, (data: any[], status: any) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+                const bounds = new window.kakao.maps.LatLngBounds()
 
-        script.onload = () => {
-            window.kakao.maps.load(() => {
-                initMap()
-            })
-        }
+                const sliced = data.slice(0, 5)
+                setPlaces(sliced)
 
-        function initMap() {
-            if (!mapRef.current) return
-            const kakao = window.kakao
+                sliced.forEach((place) => {
+                    bounds.extend(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
+                })
 
-            mapInstance.current = new kakao.maps.Map(mapRef.current, {
-                center: new kakao.maps.LatLng(33.450701, 126.570667),
-                level: 3,
-            })
-
-            infowindowRef.current = new kakao.maps.InfoWindow({ zIndex: 1 })
-            const ps = new kakao.maps.services.Places()
-            ps.keywordSearch(name, placesSearchCB)
-        }
-    }, [name])
-
-    function placesSearchCB(data: Place[], status: any) {
-        if (status === window.kakao.maps.services.Status.OK) {
-            const top5 = data.slice(0, 5)
-            setPlaces(top5)
-            displayPlaces(top5)
-        }
-    }
-
-    function displayPlaces(places: Place[]) {
-        if (!mapInstance.current || !infowindowRef.current) return
-
-        removeMarkers()
-
-        const bounds = new window.kakao.maps.LatLngBounds()
-
-        places.forEach((place, index) => {
-            const position = new window.kakao.maps.LatLng(parseFloat(place.y), parseFloat(place.x))
-            const marker = addMarker(position, index)
-            bounds.extend(position)
-
-            markerEvents(marker, place.place_name)
+                map.setBounds(bounds)
+            }
         })
+    }, [map, name, loading])
 
-        mapInstance.current.setBounds(bounds)
-    }
-
-    function removeMarkers() {
-        markersRef.current.forEach((m) => m.setMap(null))
-        markersRef.current = []
-    }
-
-    function addMarker(position: kakao.maps.LatLng, idx: number): kakao.maps.Marker {
-        const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png'
-        const imageSize = new window.kakao.maps.Size(36, 37)
-        const imgOptions = {
-            spriteSize: new window.kakao.maps.Size(36, 691),
-            spriteOrigin: new window.kakao.maps.Point(0, idx * 46 + 10),
-            offset: new window.kakao.maps.Point(13, 37),
-        }
-        const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions)
-        const marker = new window.kakao.maps.Marker({ position, image: markerImage })
-        marker.setMap(mapInstance.current)
-        markersRef.current.push(marker)
-        return marker
-    }
-
-    function markerEvents(marker: kakao.maps.Marker, title: string) {
-        if (!infowindowRef.current) return
-        window.kakao.maps.event.addListener(marker, 'mouseover', () => {
-            infowindowRef.current!.setContent(`<div style="padding:5px;">${title}</div>`)
-            infowindowRef.current!.open(mapInstance.current!, marker)
-        })
-        window.kakao.maps.event.addListener(marker, 'mouseout', () => {
-            infowindowRef.current!.close()
-        })
-    }
+    if (loading) return
+    if (error) return
 
     return (
-        <div style={{ position: 'relative', width: 500, height: 400 }}>
-            {/* 지도 */}
-            <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
-
-            {/* menu_wrap 역할 */}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 10,
-                    left: 10,
-                    width: 250,
-                    background: 'rgba(255,255,255,0.8)',
-                    borderRadius: 10,
-                    padding: 10,
-                    zIndex: 10,
-                }}
+        <div style={{ position: 'relative', width: '100%', height: '350px' }}>
+            <Map
+                center={{ lat: 37.566826, lng: 126.9786567 }}
+                style={{ width: '100%', height: '100%' }}
+                level={3}
+                onCreate={setMap}
             >
-                <b>🔍 {name}</b>
+                {places.map((place, i) => (
+                    <MapMarker
+                        key={`${place.place_name}-${i}`}
+                        position={{
+                            lat: Number(place.y),
+                            lng: Number(place.x),
+                        }}
+                        onClick={() => {
+                            setSelected(place)
+                            map?.panTo(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
+                        }}
+                    >
+                        {selected?.place_name === place.place_name && (
+                            <div style={{ padding: '5px', color: '#000' }}>{place.place_name}</div>
+                        )}
+                    </MapMarker>
+                ))}
+                <div
+                    id="menu_wrap"
+                    className="bg_white"
+                    style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: 10,
+                        width: '150px',
+                        maxHeight: '70%',
+                        overflowY: 'auto',
+                        background: 'rgba(255,255,255,0.9)',
+                        borderRadius: '10px',
+                        padding: '10px',
+                        zIndex: 2,
+                    }}
+                >
+                    <div className="option">
+                        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>🔍 "{name}" 검색 결과</div>
+                    </div>
 
-                <ul>
-                    {places.slice(0, 3).map((place, i) => (
-                        <li key={i}>
-                            <b>{place.place_name}</b>
-                            <br />
-                            {place.road_address_name || place.address_name}
-                            <br />
-                            {place.phone}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+                    <hr />
+
+                    <ul id="placesList">
+                        {places.map((place, i) => (
+                            <li
+                                key={i}
+                                className="item"
+                                style={{
+                                    borderBottom: '1px solid #ddd',
+                                    padding: '10px',
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => {
+                                    setSelected(place)
+                                    map?.panTo(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
+                                }}
+                            >
+                                <span className={`markerbg marker_${i + 1}`} />
+
+                                <div className="info">
+                                    <div style={{ fontWeight: 'bold' }}>
+                                        {i + 1}. {place.place_name}
+                                    </div>
+
+                                    {place.road_address_name ? (
+                                        <>
+                                            <span>{place.road_address_name}</span>
+                                            <span style={{ color: '#888' }}>{place.address_name}</span>
+                                        </>
+                                    ) : (
+                                        <span>{place.address_name}</span>
+                                    )}
+
+                                    <span style={{ color: 'green' }}>{place.phone}</span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </Map>
         </div>
     )
 }
