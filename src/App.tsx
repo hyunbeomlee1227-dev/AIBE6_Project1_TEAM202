@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { BottomNav } from './components/Shared/Navigation'
+import { BottomNav } from './components/shared/Navigation'
 import { AuthProvider } from './contexts/AuthContext'
 import { CommunityPage } from './pages/Community/view/CommunityPage'
 import { CreatePostPage } from './pages/Community/view/CreatePostPage'
@@ -8,8 +8,8 @@ import { HomePage } from './pages/Home/HomePage'
 import { LoginPage } from './pages/MyPage/view/LoginPage'
 import { MyPage } from './pages/MyPage/view/MyPage'
 import { SignupPage } from './pages/MyPage/view/SignupPage'
-import { ResultPage } from './pages/TestPage/view/ResultPage'
-import { TestPage } from './pages/TestPage/view/TestPage'
+import { ResultPage } from './pages/Test/view/ResultPage'
+import { TestPage } from './pages/Test/view/TestPage'
 export function App() {
     return (
         <AuthProvider>
