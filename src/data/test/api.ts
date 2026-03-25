@@ -20,8 +20,6 @@ export async function requestGemini(request: string) {
         contents: prompt,
     })
 
-    console.log(result)
-
-    if (result !== undefined) return result.text
+    if (result !== undefined) return JSON.parse(result.text!)
     else return console.log('AI 응답 실패')
 }
