@@ -4,12 +4,14 @@ import { AuthProvider } from './contexts/AuthContext'
 import { CommunityPage } from './pages/CommunityPage'
 import { CreatePostPage } from './pages/CreatePostPage'
 import { DetailPage } from './pages/DetailPage'
+import { DetailPostPage } from './pages/DetailPostPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyPage } from './pages/MyPage'
 import { ResultPage } from './pages/ResultPage'
 import { SignupPage } from './pages/SignupPage'
 import { TestPage } from './pages/TestPage'
+
 export function App() {
     return (
         <AuthProvider>
@@ -25,6 +27,7 @@ export function App() {
                                 <Route path="/result/:type" element={<ResultPage />} />
                                 <Route path="/place/:id" element={<DetailPage />} />
                                 <Route path="/community" element={<CommunityPage />} />
+                                <Route path="/community/:id" element={<DetailPostPage />} />
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/signup" element={<SignupPage />} />
                                 <Route path="/my" element={<MyPage />} />

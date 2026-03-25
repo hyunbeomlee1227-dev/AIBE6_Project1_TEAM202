@@ -11,7 +11,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmar
     const travelTypeInfo = resultTypes[post.type]
     return (
         <Card hoverable className="overflow-hidden bg-white border border-gray-50">
-            {/* Author Header */}
+            {/* 사용자 프로필 - 프로필사진, 닉네임, 여행타입 출력 */}
             <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <img
@@ -30,12 +30,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmar
                 </div>
             </div>
 
-            {/* Image */}
+            {/* 게시물 이미지 */}
             <div className="aspect-square w-full bg-gray-100 relative">
                 <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
             </div>
 
-            {/* Actions */}
+            {/* 게시물 좋아요, 댓글, 북마크 버튼 */}
             <div className="px-4 pt-4 pb-2 flex justify-between items-center">
                 <div className="flex gap-4">
                     <button
@@ -59,7 +59,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmar
                 </button>
             </div>
 
-            {/* Content */}
+            {/* 게시물 제목, 내용 출력 */}
             <div className="px-4 pb-5">
                 <h4 className="font-bold text-text text-sm mb-1 line-clamp-1">{post.title}</h4>
                 <p className="text-sm text-text-muted line-clamp-2 leading-relaxed">{post.content}</p>

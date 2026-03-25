@@ -50,6 +50,15 @@ export interface Post {
     isBookmarked: boolean
     type: TravelType
     createdAt: string
+    comments: Comments[]
+}
+
+// 댓글 인터페이스 생성 후 포스트에 추가
+export interface Comments {
+    id: string
+    author: User
+    content: string
+    createdAt: string
 }
 
 export const mockUsers: User[] = [
@@ -266,6 +275,20 @@ export const posts: Post[] = [
         isBookmarked: true,
         type: 'PHOTO',
         createdAt: '2023-10-01T10:00:00Z',
+        comments: [
+            {
+                id: 'c1',
+                author: mockUsers[1],
+                content: '와 진짜 예쁘네요! 저도 가보고 싶어요 ㅠㅠ',
+                createdAt: '2023-10-01T11:00:00Z',
+            },
+            {
+                id: 'c2',
+                author: mockUsers[2],
+                content: '사진 색감 보정 어떻게 하셨어요? 꿀팁 공유해주세요!',
+                createdAt: '2023-10-01T12:00:00Z',
+            },
+        ],
     },
     {
         id: 'post2',
@@ -280,6 +303,20 @@ export const posts: Post[] = [
         isBookmarked: false,
         type: 'FOOD',
         createdAt: '2023-10-02T14:30:00Z',
+        comments: [
+            {
+                id: 'c1',
+                author: mockUsers[1],
+                content: '와 진짜 예쁘네요! 저도 가보고 싶어요 ㅠㅠ',
+                createdAt: '2023-10-01T11:00:00Z',
+            },
+            {
+                id: 'c2',
+                author: mockUsers[2],
+                content: '사진 색감 보정 어떻게 하셨어요? 꿀팁 공유해주세요!',
+                createdAt: '2023-10-01T12:00:00Z',
+            },
+        ],
     },
     {
         id: 'post3',
@@ -294,6 +331,20 @@ export const posts: Post[] = [
         isBookmarked: false,
         type: 'HEALING',
         createdAt: '2023-10-03T09:15:00Z',
+        comments: [
+            {
+                id: 'c1',
+                author: mockUsers[1],
+                content: '와 진짜 예쁘네요! 저도 가보고 싶어요 ㅠㅠ',
+                createdAt: '2023-10-01T11:00:00Z',
+            },
+            {
+                id: 'c2',
+                author: mockUsers[2],
+                content: '사진 색감 보정 어떻게 하셨어요? 꿀팁 공유해주세요!',
+                createdAt: '2023-10-01T12:00:00Z',
+            },
+        ],
     },
     {
         id: 'post4',
@@ -308,5 +359,19 @@ export const posts: Post[] = [
         isBookmarked: true,
         type: 'CITY',
         createdAt: '2023-10-04T20:45:00Z',
+        comments: [
+            {
+                id: 'c1',
+                author: mockUsers[1],
+                content: '와 진짜 예쁘네요! 저도 가보고 싶어요 ㅠㅠ',
+                createdAt: '2023-10-01T11:00:00Z',
+            },
+            {
+                id: 'c2',
+                author: mockUsers[2],
+                content: '사진 색감 보정 어떻게 하셨어요? 꿀팁 공유해주세요!',
+                createdAt: '2023-10-01T12:00:00Z',
+            },
+        ],
     },
 ]
