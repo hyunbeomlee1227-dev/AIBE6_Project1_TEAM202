@@ -33,7 +33,7 @@ export const BottomNav: React.FC = () => {
     ]
 
     return (
-        <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 pb-safe flex justify-around items-center z-50">
+        <div className="absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 pb-safe flex justify-around items-center z-50">
             {navItems.map((item) => {
                 const isActive =
                     location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))

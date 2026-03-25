@@ -2,10 +2,9 @@ import { motion } from 'framer-motion'
 import { ChevronLeftIcon, ImageIcon, XIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '../components/ui/Button'
-import { useAuth } from '../contexts/AuthContext'
-import { TravelType, resultTypes } from '../data/mockData'
-
+import { Button } from '../../../components/ui/Button'
+import { useAuth } from '../../../contexts/AuthContext'
+import { TravelType, resultTypes } from '../../../data/mockData'
 export const CreatePostPage: React.FC = () => {
     const navigate = useNavigate()
     const { isAuthenticated, user } = useAuth()
@@ -13,14 +12,11 @@ export const CreatePostPage: React.FC = () => {
     const [content, setContent] = useState('')
     const [selectedType, setSelectedType] = useState<TravelType>(user?.travelType || 'HEALING')
     const [imagePreview, setImagePreview] = useState<string | null>(null)
-
     useEffect(() => {
         if (!isAuthenticated) {
             navigate('/login')
         }
     }, [isAuthenticated, navigate])
-    // 로그인 여부 확인
-
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
@@ -31,19 +27,16 @@ export const CreatePostPage: React.FC = () => {
             reader.readAsDataURL(file)
         }
     }
-    // 이미지 파일 업로드
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
+        // Mock submission
         if (title && content) {
             navigate('/community')
         }
     }
-    // 게시글 작성
-
     return (
         <div className="min-h-full bg-background flex flex-col pb-safe">
-            {/* 헤더 */}
+            {/* Header */}
             <div className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 py-3 flex items-center justify-between border-b border-gray-100">
                 <button
                     onClick={() => navigate(-1)}
@@ -67,7 +60,7 @@ export const CreatePostPage: React.FC = () => {
                 className="flex-1 p-6"
             >
                 <form onSubmit={handleSubmit} className="space-y-6 flex flex-col h-full">
-                    {/* 사진 업로드 */}
+                    {/* Image Upload */}
                     <div>
                         <label className="block text-sm font-bold text-text mb-2">사진 업로드</label>
                         {imagePreview ? (
@@ -91,7 +84,7 @@ export const CreatePostPage: React.FC = () => {
                         )}
                     </div>
 
-                    {/* 제목 입력 */}
+                    {/* Title */}
                     <div>
                         <label className="block text-sm font-bold text-text mb-2">제목</label>
                         <input
@@ -104,7 +97,7 @@ export const CreatePostPage: React.FC = () => {
                         />
                     </div>
 
-                    {/* 내용 입력 */}
+                    {/* Content */}
                     <div>
                         <label className="block text-sm font-bold text-text mb-2">내용</label>
                         <textarea
@@ -116,7 +109,7 @@ export const CreatePostPage: React.FC = () => {
                         />
                     </div>
 
-                    {/* 여행 스타일 태그 */}
+                    {/* Travel Type Tag */}
                     <div className="pb-20">
                         <label className="block text-sm font-bold text-text mb-2">여행 스타일 태그</label>
                         <div className="grid grid-cols-2 gap-2">
@@ -134,7 +127,7 @@ export const CreatePostPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* 게시글 작성 버튼 (하단 고정) */}
+                    {/* Submit Button (Fixed Bottom) */}
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-100 pb-safe">
                         <Button type="submit" fullWidth className="shadow-lg shadow-primary/20">
                             게시하기

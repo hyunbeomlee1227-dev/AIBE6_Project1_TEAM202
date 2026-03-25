@@ -1,20 +1,21 @@
 import { motion } from 'framer-motion'
-import { ChevronLeftIcon, LockIcon, MailIcon } from 'lucide-react'
+import { ChevronLeftIcon, LockIcon, MailIcon, UserIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
-import { useAuth } from '../contexts/AuthContext'
-export const LoginPage: React.FC = () => {
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
+import { useAuth } from '../../../contexts/AuthContext'
+export const SignupPage: React.FC = () => {
     const navigate = useNavigate()
-    const { login } = useAuth()
+    const { signup } = useAuth()
     const [email, setEmail] = useState('')
+    const [nickname, setNickname] = useState('')
     const [password, setPassword] = useState('')
-    const handleLogin = (e: React.FormEvent) => {
+    const handleSignup = (e: React.FormEvent) => {
         e.preventDefault()
-        if (email && password) {
-            login(email)
-            navigate(-1) // Go back to previous page
+        if (email && nickname && password) {
+            signup(email, nickname)
+            navigate('/')
         }
     }
     return (
@@ -37,18 +38,15 @@ export const LoginPage: React.FC = () => {
                     opacity: 1,
                     y: 0,
                 }}
-                className="flex-1 px-6 flex flex-col justify-center pb-20"
+                className="flex-1 px-6 flex flex-col justify-center pb-12"
             >
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-white rounded-2xl shadow-soft flex items-center justify-center mx-auto mb-4 text-3xl">
-                        👋
-                    </div>
-                    <h1 className="text-2xl font-bold text-text mb-2">다시 만나서 반가워요!</h1>
-                    <p className="text-text-muted text-sm">로그인하고 나만의 여행 스타일을 찾아보세요</p>
+                    <h1 className="text-2xl font-bold text-text mb-2">환영합니다! ✨</h1>
+                    <p className="text-text-muted text-sm">간단한 정보 입력 후 바로 시작해보세요</p>
                 </div>
 
                 <Card className="p-6 mb-6">
-                    <form onSubmit={handleLogin} className="space-y-4">
+                    <form onSubmit={handleSignup} className="space-y-4">
                         <div>
                             <label className="block text-sm font-bold text-text mb-1.5">이메일</label>
                             <div className="relative">
@@ -60,6 +58,23 @@ export const LoginPage: React.FC = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="hello@poomang.com"
+                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-text mb-1.5">닉네임</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
+                                    <UserIcon className="w-5 h-5" />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={nickname}
+                                    onChange={(e) => setNickname(e.target.value)}
+                                    placeholder="여행러"
                                     className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
                                     required
                                 />
@@ -83,26 +98,17 @@ export const LoginPage: React.FC = () => {
                             </div>
                         </div>
 
-                        <Button type="submit" fullWidth className="mt-2 shadow-md shadow-primary/20">
-                            로그인하기
+                        <Button type="submit" fullWidth className="mt-4 shadow-md shadow-primary/20">
+                            가입하기
                         </Button>
                     </form>
                 </Card>
 
-                <div className="space-y-3">
-                    <button className="w-full flex items-center justify-center gap-2 py-3 bg-[#FEE500] text-[#000000] rounded-xl font-bold text-sm hover:bg-[#FEE500]/90 transition-colors">
-                        카카오로 시작하기
-                    </button>
-                    <button className="w-full flex items-center justify-center gap-2 py-3 bg-white border border-gray-200 text-text rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors">
-                        Google로 시작하기
-                    </button>
-                </div>
-
-                <div className="mt-8 text-center">
+                <div className="mt-4 text-center">
                     <p className="text-sm text-text-muted">
-                        계정이 없으신가요?{' '}
-                        <Link to="/signup" className="font-bold text-primary hover:underline">
-                            회원가입
+                        이미 계정이 있으신가요?{' '}
+                        <Link to="/login" className="font-bold text-primary hover:underline">
+                            로그인
                         </Link>
                     </p>
                 </div>

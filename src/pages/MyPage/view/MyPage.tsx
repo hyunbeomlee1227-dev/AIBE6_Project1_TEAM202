@@ -2,11 +2,11 @@ import { motion } from 'framer-motion'
 import { LogOutIcon, SettingsIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PlaceCard } from '../components/PlaceCard'
-import { PostCard } from '../components/PostCard'
-import { Button } from '../components/ui/Button'
-import { useAuth } from '../contexts/AuthContext'
-import { places, posts, resultTypes } from '../data/mockData'
+import { PlaceCard } from '../../../components/shared/PlaceCard'
+import { PostCard } from '../../../components/shared/PostCard'
+import { Button } from '../../../components/ui/Button'
+import { useAuth } from '../../../contexts/AuthContext'
+import { places, posts, resultTypes } from '../../../data/mockData'
 export const MyPage: React.FC = () => {
     const { user, logout, isAuthenticated } = useAuth()
     const navigate = useNavigate()

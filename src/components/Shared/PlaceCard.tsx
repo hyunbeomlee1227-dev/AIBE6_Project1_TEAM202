@@ -1,8 +1,8 @@
 import { MapPinIcon } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Place } from '../data/mockData'
-import { Card } from './ui/Card'
+import { Place } from '../../data/mockData'
+import { Card } from '../ui/Card'
 interface PlaceCardProps {
     place: Place
 }

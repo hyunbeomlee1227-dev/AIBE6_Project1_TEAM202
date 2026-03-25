@@ -2,9 +2,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card } from '../components/ui/Card'
-import { ProgressBar } from '../components/ui/ProgressBar'
-import { questions, TravelType } from '../data/mockData'
+import { Card } from '../../../components/ui/Card'
+import { questions, TravelType } from '../../../data/mockData'
+import { ProgressBar } from '../component/ProgressBar'
 export const TestPage: React.FC = () => {
     const navigate = useNavigate()
     const [currentIndex, setCurrentIndex] = useState(0)

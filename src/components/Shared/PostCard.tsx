@@ -1,7 +1,7 @@
 import { BookmarkIcon, HeartIcon, MessageCircleIcon } from 'lucide-react'
 import React from 'react'
-import { Post, resultTypes } from '../data/mockData'
-import { Card } from './ui/Card'
+import { Post, resultTypes } from '../../data/mockData'
+import { Card } from '../ui/Card'
 interface PostCardProps {
     post: Post
     onLikeClick?: () => void

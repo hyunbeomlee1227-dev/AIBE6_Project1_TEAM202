@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { LockIcon, XIcon } from 'lucide-react'
 import React from 'react'
-import { Button } from './ui/Button'
-import { Card } from './ui/Card'
+import { Button } from '../ui/Button'
+import { Card } from '../ui/Card'
 interface LoginPromptModalProps {
     isOpen: boolean
     onClose: () => void

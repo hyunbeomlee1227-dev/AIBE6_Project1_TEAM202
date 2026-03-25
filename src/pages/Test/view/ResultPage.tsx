@@ -1,30 +1,12 @@
-'use client'
-import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PlaceCard } from '../components/PlaceCard'
-import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
-import { geminiAPIKey } from '../data/apikey'
-import { places, resultTypes, TravelType } from '../data/mockData'
-import createPlacecPrompt from '../data/prompt'
-
+import { PlaceCard } from '../../../components/shared/PlaceCard'
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
+import { places, resultTypes, TravelType } from '../../../data/mockData'
 export const ResultPage: React.FC = () => {
-    async function requestGemini(request: string) {
-        const ai = new GoogleGenAI({ apiKey: geminiAPIKey })
-        const prompt = createPlacecPrompt(request)
-
-        const result = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        })
-
-        if (result !== undefined) return console.log(result.text)
-        else return console.log('AI 응답 실패')
-    }
-
     const { type } = useParams<{
         type: string
     }>()
@@ -35,11 +17,7 @@ export const ResultPage: React.FC = () => {
             navigate('/')
         }
     }, [result, navigate])
-
     if (!result) return null
-
-    requestGemini(result.title)
-
     const recommendedPlaces = places.filter((p) => p.type === result.id)
     return (
         <div className="min-h-full bg-background pb-24 overflow-y-auto">
