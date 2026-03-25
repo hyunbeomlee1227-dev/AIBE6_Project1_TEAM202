@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Edit3Icon } from 'lucide-react'
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { LoginPromptModal } from '../components/LoginPromptModal'
 import { PostCard } from '../components/PostCard'
 import { useAuth } from '../contexts/AuthContext'
@@ -118,13 +118,11 @@ export const CommunityPage: React.FC = () => {
                             delay: idx * 0.1,
                         }}
                     >
-                        <Link to={`/community/${post.id}`}>
-                            <PostCard
-                                post={post}
-                                onLikeClick={() => handleLikeClick(post.id)}
-                                onBookmarkClick={handleProtectedAction}
-                            />
-                        </Link>
+                        <PostCard
+                            post={post}
+                            onLikeClick={() => handleLikeClick(post.id)}
+                            onBookmarkClick={handleProtectedAction}
+                        />
                     </motion.div>
                 ))}
             </div>
