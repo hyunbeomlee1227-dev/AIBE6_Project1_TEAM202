@@ -1,15 +1,15 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { BottomNav } from './components/Shared/Navigation'
 import { AuthProvider } from './contexts/AuthContext'
-import { CommunityPage } from './pages/CommunityPage'
-import { CreatePostPage } from './pages/CreatePostPage'
+import { CommunityPage } from './pages/Community/view/CommunityPage'
+import { CreatePostPage } from './pages/Community/view/CreatePostPage'
 import { DetailPage } from './pages/DetailPage'
-import { HomePage } from './pages/HomePage'
-import { LoginPage } from './pages/LoginPage'
-import { MyPage } from './pages/MyPage'
-import { ResultPage } from './pages/ResultPage'
-import { SignupPage } from './pages/SignupPage'
-import { TestPage } from './pages/TestPage'
+import { HomePage } from './pages/Home/HomePage'
+import { LoginPage } from './pages/MyPage/view/LoginPage'
+import { MyPage } from './pages/MyPage/view/MyPage'
+import { SignupPage } from './pages/MyPage/view/SignupPage'
+import { ResultPage } from './pages/TestPage/view/ResultPage'
+import { TestPage } from './pages/TestPage/view/TestPage'
 export function App() {
     return (
         <AuthProvider>
