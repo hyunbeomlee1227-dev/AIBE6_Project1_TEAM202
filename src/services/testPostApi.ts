@@ -1,0 +1,179 @@
+import { supabase } from '../lib/supabase'
+
+export interface CreatePostInput {
+    title: string
+    content: string
+    image_url?: string | null
+    travel_type: string
+    user_id?: string | null
+}
+
+export interface Post {
+    id: string
+    title: string
+    content: string
+    image_url: string | null
+    travel_type: string
+    like_count: number
+    comment_count: number
+    user_id: string | null
+    created_at: string
+}
+
+export interface Comment {
+    id: string
+    post_id: string
+    user_id: string
+    content: string
+    created_at: string
+}
+
+export const getCurrentUserId = async (): Promise<string | null> => {
+    const {
+        data: { session },
+    } = await supabase.auth.getSession()
+    const userId = session?.user?.id ?? null
+    console.log('getCurrentUserId:', userId)
+    return userId
+}
+
+// posts 테이블 레코드 수 확인
+export const getPostCount = async () => {
+    const { count, error } = await supabase.from('posts').select('*', { count: 'exact', head: true })
+
+    if (error) {
+        console.error('getPostCount error:', error)
+        throw error
+    }
+
+    console.log('getPostCount count:', count)
+    return { count: count ?? 0 }
+}
+
+// posts 테이블에 게시글 저장
+export const savePost = async (post: CreatePostInput) => {
+    const { data, error } = await supabase
+        .from('posts')
+        .insert({
+            title: post.title,
+            content: post.content,
+            image_url: post.image_url ?? null,
+            travel_type: post.travel_type,
+            like_count: 0,
+            comment_count: 0,
+            user_id: post.user_id ?? null,
+        })
+        .select()
+
+    if (error) {
+        throw error
+    }
+
+    return data
+}
+
+// posts 테이블 전체 조회 (저장 확인용)
+export const getPosts = async (): Promise<Post[]> => {
+    const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false })
+    if (error) {
+        console.error('getPosts error:', error)
+        throw error
+    }
+    return data ?? []
+}
+
+// 이미지를 Storage에 업로드하고 URL 반환
+export const uploadPostImage = async (file: File): Promise<string> => {
+    const fileName = `${Date.now()}_${file.name}`
+    const { error } = await supabase.storage.from('posts').upload(fileName, file)
+    if (error) {
+        console.error('uploadPostImage error:', error)
+        throw error
+    }
+    const { data } = supabase.storage.from('posts').getPublicUrl(fileName)
+    return data.publicUrl
+}
+
+// 단건조회
+export const getPostById = async (postId: string): Promise<Post | null> => {
+    const { data, error } = await supabase.from('posts').select('*').eq('id', postId).single()
+
+    if (error) {
+        console.error('getPostById error:', error)
+        return null
+    }
+    return data
+}
+
+// 북마크
+export const toggleBookmark = async (postId: string, userId: string): Promise<boolean> => {
+    const { data: existing } = await supabase
+        .from('bookmarks')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+    if (existing) {
+        await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
+        return false
+    } else {
+        await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
+        return true
+    }
+}
+
+export const getBookmarkedPostIds = async (userId: string): Promise<string[]> => {
+    const { data, error } = await supabase.from('bookmarks').select('post_id').eq('user_id', userId)
+    if (error) return []
+    return data.map((d) => d.post_id)
+}
+
+// 댓글
+export const getComments = async (postId: string): Promise<Comment[]> => {
+    const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true })
+    if (error) return []
+    return data ?? []
+}
+
+export const saveComment = async (postId: string, userId: string, content: string): Promise<Comment | null> => {
+    const { data, error } = await supabase
+        .from('comments')
+        .insert({ post_id: postId, user_id: userId, content })
+        .select()
+        .single()
+
+    if (error) throw error
+    await supabase.rpc('increment_comment_count', { post_id: postId })
+    return data
+}
+
+//좋아요
+export const toggleLike = async (postId: string, userId: string): Promise<boolean> => {
+    const { data: existing } = await supabase
+        .from('post_likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+    if (existing) {
+        await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+        await supabase.rpc('decrement_like_count', { post_id: postId })
+        return false
+    } else {
+        await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+        await supabase.rpc('increment_like_count', { post_id: postId })
+        return true
+    }
+}
+
+export const getLikedPostIds = async (userId: string): Promise<string[]> => {
+    const { data, error } = await supabase.from('post_likes').select('post_id').eq('user_id', userId)
+    if (error) return []
+    return data.map((d) => d.post_id)
+}

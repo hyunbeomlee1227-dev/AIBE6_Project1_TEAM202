@@ -1,6 +1,6 @@
 export type TravelType = 'HEALING' | 'SHOPPING' | 'FOOD' | 'PHOTO' | 'CALM' | 'EXPLORER'
 
-export type { ScoreMap, AnswerOption, Question } from './models/testTypes'
+export type { AnswerOption, Question, ScoreMap } from './models/testTypes'
 
 export interface Place {
     id: string
@@ -24,7 +24,7 @@ export interface User {
     createdAt: string
 }
 
-export interface Post {
+export interface MockPost {
     id: string
     author: User
     title: string
@@ -153,7 +153,7 @@ export const mockUsers: User[] = [
     },
 ]
 
-export const posts: Post[] = [
+export const posts: MockPost[] = [
     {
         id: 'post1',
         author: mockUsers[0],
