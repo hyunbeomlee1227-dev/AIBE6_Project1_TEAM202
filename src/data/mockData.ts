@@ -50,10 +50,11 @@ export interface Post {
     isBookmarked: boolean
     type: TravelType
     createdAt: string
-    comments: Comment[]
+    comments: Comments[]
 }
 
-export interface Comment {
+// 댓글 인터페이스 생성 후 포스트에 추가
+export interface Comments {
     id: string
     author: User
     content: string
