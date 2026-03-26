@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { LoginPromptModal } from '../../../components/shared/LoginPromptModal'
 import { useAuth } from '../../../contexts/AuthContext'
 import { posts, TravelType } from '../../../data/mockData'
-import { FilterBar } from './components/filterBar'
-import { PostFeed } from './components/postFeed'
-import { WriteButton } from './components/writeButton'
+import { FilterBar } from '../components/filterBar'
+import { PostFeed } from '../components/postFeed'
+import { WriteButton } from '../components/writeButton'
 
 export const CommunityPage: React.FC = () => {
     const navigate = useNavigate()
