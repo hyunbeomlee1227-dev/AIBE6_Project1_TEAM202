@@ -19,6 +19,7 @@ function createPlacecPrompt(keyword: string) {
             - description은 1~2문장
             - 반드시 JSON 배열로만 반환
             - JSON 외의 텍스트 절대 금지
+            - 코드블럭 없이 순수 JSON만 반환해
     
             키워드: ${keyword}`
 }
