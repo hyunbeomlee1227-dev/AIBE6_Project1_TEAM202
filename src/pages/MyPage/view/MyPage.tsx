@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookmarkIcon, LogOutIcon, MapPinIcon, UserIcon } from 'lucide-react'
-import { useAuth } from '../../../contexts/AuthContext'
+import { PlaceCard } from '../../../components/shared/PlaceCard'
+import { PostCard } from '../../../components/shared/PostCard'
 import { Button } from '../../../components/ui/Button'
+import { useAuth } from '../../../contexts/AuthContext'
 import { Card } from '../../../components/ui/Card'
 
 export const MyPage: React.FC = () => {

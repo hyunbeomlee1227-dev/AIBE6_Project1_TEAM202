@@ -1,35 +1,43 @@
 'use client'
+import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+<<<<<<< HEAD:src/pages/Test/view/ResultPage.tsx
 import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-// import { Gemini_API_KEY } from '../../../data/apikey'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
+import createPlacecPrompt from '../../../data/prompt'
+=======
+import { PlaceCard } from '../components/PlaceCard'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Gemini_API_KEY } from '../data/apikey'
+import { places, resultTypes, TravelType } from '../data/mockData'
+import createPlacecPrompt from '../data/prompt'
+>>>>>>> 51491045284bf9ddf96dc60e5d0511bad6ab383d:src/pages/ResultPage.tsx
 
 export const ResultPage: React.FC = () => {
-    // async function requestGemini(request: string) {
-    //     const ai = new GoogleGenAI({ apiKey: Gemini_API_KEY })
-    //     const prompt = createPlacecPrompt(request)
+    async function requestGemini(request: string) {
+        const ai = new GoogleGenAI({ apiKey: Gemini_API_KEY })
+        const prompt = createPlacecPrompt(request)
 
-    //     const result = await ai.models.generateContent({
-    //         model: 'gemini-2.5-flash',
-    //         contents: prompt,
-    //     })
+        const result = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        })
 
-    //     if (result !== undefined) return result.text
-    //     else return console.log('AI 응답 실패')
-    // }
+        if (result !== undefined) return console.log(result.text)
+        else return console.log('AI 응답 실패')
+    }
 
     const { type } = useParams<{
         type: string
     }>()
     const navigate = useNavigate()
-    // 2. 추출한 type 글자를 이용해 전체 결과 데이터(resultTypes)에서 상세 정보 객체를 찾아옴
     const result = resultTypes[type as TravelType]
-    // 3. [방어 로직] 만약 사용자가 주소창에 잘못된 값을 쳐서 결과 데이터가 없다면?
     useEffect(() => {
         if (!result) {
             navigate('/')
@@ -38,7 +46,7 @@ export const ResultPage: React.FC = () => {
 
     if (!result) return null
 
-    // const answer = requestGemini(result.title)
+    requestGemini(result.title)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
