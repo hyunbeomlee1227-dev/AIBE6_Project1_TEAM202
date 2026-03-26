@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { BookmarkIcon, ChevronLeftIcon, MapPinIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoginPromptModal } from '../components/shared/LoginPromptModal'
+import { LoginPromptModal } from '../components/Shared/LoginPromptModal'
 import { useAuth } from '../contexts/AuthContext'
 import { places } from '../data/mockData'
 export const DetailPage: React.FC = () => {
