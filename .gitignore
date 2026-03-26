@@ -30,5 +30,3 @@ src/data/apikey.ts
 .env
 .env.local
 .env.*.local
-
-src/data/apikey.ts
