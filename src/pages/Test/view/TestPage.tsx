@@ -3,8 +3,10 @@ import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
-import { AnswerOption, TravelType } from '../../../data/mockData'
+import { useAuth } from '../../../contexts/AuthContext'
 import { questions } from '../../../data/mock/questions'
+import { AnswerOption, TravelType } from '../../../data/mockData'
+import { saveTestResult } from '../../../services/testCountApi'
 import { ProgressBar } from '../component/ProgressBar'
 
 // 점수 초기값: TravelType 6개 모두 0점에서 시작
@@ -32,6 +34,7 @@ function calculateScores(selectedOptions: AnswerOption[]): Record<TravelType, nu
 const priorityOrder: TravelType[] = ['CALM', 'HEALING', 'FOOD', 'PHOTO', 'SHOPPING', 'EXPLORER']
 
 export const TestPage: React.FC = () => {
+    const { user } = useAuth()
     const navigate = useNavigate()
     const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -39,7 +42,7 @@ export const TestPage: React.FC = () => {
     const [direction, setDirection] = useState(1)
     const currentQuestion = questions[currentIndex]
 
-    const handleAnswer = (option: AnswerOption) => {
+    const handleAnswer = async (option: AnswerOption) => {
         const newAnswers = [...answers, option]
         setAnswers(newAnswers)
         if (currentIndex < questions.length - 1) {
@@ -50,6 +53,12 @@ export const TestPage: React.FC = () => {
             const maxScore = Math.max(...Object.values(scores))
             const topKeys = (Object.keys(scores) as TravelType[]).filter((k) => scores[k] === maxScore)
             const resultType = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
+
+            try {
+                await saveTestResult(resultType, user?.id)
+            } catch (error) {
+                console.error('테스트 결과 저장 실패', error)
+            }
             navigate(`/result/${resultType}`, { replace: true })
         }
     }
