@@ -2,17 +2,24 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookmarkIcon, LogOutIcon, MapPinIcon, UserIcon } from 'lucide-react'
-import { PlaceCard } from '../../../components/shared/PlaceCard'
-import { PostCard } from '../../../components/shared/PostCard'
 import { Button } from '../../../components/ui/Button'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card } from '../../../components/ui/Card'
+import { supabase } from '../../../lib/supabase'
+
+type Profile = {
+    id: string
+    nickname: string | null
+    avatar_url: string | null
+    created_at: string
+}
 
 export const MyPage: React.FC = () => {
     const navigate = useNavigate()
     const { user, logout, isAuthenticated, isLoading, displayName, profileImage } = useAuth()
 
     const [activeTab, setActiveTab] = useState<'bookmarks' | 'posts'>('bookmarks')
+    const [profile, setProfile] = useState<Profile | null>(null)
 
     const mockBookmarks = useMemo(
         () => [
@@ -36,6 +43,28 @@ export const MyPage: React.FC = () => {
         }
     }, [isAuthenticated, isLoading, navigate])
 
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) return
+
+            const { data, error } = await supabase
+                .from('users')
+                .select('id, nickname, avatar_url, created_at')
+                .eq('id', user.id)
+                .single()
+
+            if (error) {
+                console.error('프로필 조회 실패:', error)
+                return
+            }
+
+            console.log('DB profile:', data)
+            setProfile(data)
+        }
+
+        fetchProfile()
+    }, [user])
+
     if (isLoading) {
         return (
             <div className="min-h-full flex items-center justify-center">
@@ -49,7 +78,8 @@ export const MyPage: React.FC = () => {
     }
 
     const email = user.email ?? '이메일 정보 없음'
-    const avatarSrc = profileImage || 'https://i.pravatar.cc/150?img=12'
+    const nickname = profile?.nickname || displayName
+    const avatarSrc = profile?.avatar_url || profileImage || 'https://i.pravatar.cc/150?img=12'
 
     const handleLogout = async () => {
         try {
@@ -69,11 +99,11 @@ export const MyPage: React.FC = () => {
                     className="flex items-center gap-4"
                 >
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
-                        <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
+                        <img src={avatarSrc} alt={nickname} className="w-full h-full object-cover" />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl font-bold text-text mb-1 truncate">{displayName}</h1>
+                        <h1 className="text-2xl font-bold text-text mb-1 truncate">{nickname}</h1>
                         <p className="text-sm text-text-muted truncate">{email}</p>
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">
