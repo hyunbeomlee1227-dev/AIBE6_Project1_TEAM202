@@ -7,6 +7,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+
+import { Gemini_API_KEY } from '../../../data/apikey'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
 import createPlacecPrompt from '../../../data/prompt'
 
