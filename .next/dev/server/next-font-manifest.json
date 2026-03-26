@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "app": {
     "[project]/Desktop/Github/AIBE6_Project1_Team202/AIBE6_Project1_TEAM202/src/app/page": [
       "static/media/caa3a2e1cccd8315-s.p.16t1db8_9y2o~.woff2",
@@ -6,6 +7,10 @@
     ]
   },
   "appUsingSizeAdjust": true,
+=======
+  "app": {},
+  "appUsingSizeAdjust": false,
+>>>>>>> dev
   "pages": {},
   "pagesUsingSizeAdjust": false
 }

@@ -2,35 +2,19 @@ import React, { createContext, useContext, useEffect, useMemo, useState, type Re
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
-/**
- * 프로젝트에서 사용할 인증 사용자 타입
- * - Supabase User를 그대로 쓰되
- * - 화면에서 자주 쓸 display 정보들을 helper로 같이 제공
- */
 interface AuthContextType {
     user: User | null
     session: Session | null
     isAuthenticated: boolean
     isLoading: boolean
-
-    /**
-     * 표시용 데이터
-     */
     displayName: string
     profileImage: string | null
-
-    /**
-     * 인증 액션
-     */
     loginWithKakao: () => Promise<void>
     logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-/**
- * user metadata에서 화면용 이름 추출
- */
 const getDisplayName = (user: User | null) => {
     if (!user) return ''
 
@@ -44,9 +28,6 @@ const getDisplayName = (user: User | null) => {
     )
 }
 
-/**
- * user metadata에서 프로필 이미지 추출
- */
 const getProfileImage = (user: User | null) => {
     if (!user) return null
 
@@ -54,18 +35,11 @@ const getProfileImage = (user: User | null) => {
 }
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    /**
-     * 현재 세션 / 사용자 / 초기 로딩 상태
-     */
     const [session, setSession] = useState<Session | null>(null)
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        /**
-         * 앱 진입 시 기존 세션 복원
-         * - 새로고침해도 로그인 유지되게 하는 핵심
-         */
         const initializeAuth = async () => {
             try {
                 const {
@@ -88,12 +62,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         initializeAuth()
 
-        /**
-         * 인증 상태 변경 감지
-         * - 로그인 성공
-         * - 로그아웃
-         * - 토큰 갱신
-         */
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -107,33 +75,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [])
 
-    /**
-     * 카카오 OAuth 로그인
-     * - 로그인 후 /my 로 이동
-     */
     const loginWithKakao = async () => {
         const redirectTo = `${window.location.origin}/my`
-        console.log('카카오 로그인 redirectTo:', redirectTo)
 
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
             provider: 'kakao',
             options: {
                 redirectTo,
             },
         })
 
-        console.log('oauth data:', data)
-        console.log('oauth error:', error)
-
         if (error) {
-            console.error('카카오 로그인 실패:', error)
             throw error
         }
     }
 
-    /**
-     * 로그아웃
-     */
     const logout = async () => {
         const { error } = await supabase.auth.signOut()
 
@@ -145,9 +101,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(null)
     }
 
-    /**
-     * 화면에서 자주 쓰는 값은 미리 계산
-     */
     const value = useMemo(
         () => ({
             user,

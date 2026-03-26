@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeftIcon, LockIcon, MailIcon } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
-import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
+import { useAuth } from '../../../contexts/AuthContext'
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate()
