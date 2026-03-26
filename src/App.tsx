@@ -4,7 +4,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import { CommunityPage } from './pages/Community/view/CommunityPage'
 import { CreatePostPage } from './pages/Community/view/CreatePostPage'
 import { DetailPostPage } from './pages/Community/view/DetailPostPage'
-import { DetailPage } from './pages/DetailPage'
+
+import { RouteIndicator } from './components/shared/RouteIndicator'
 import { HomePage } from './pages/Home/view/HomePage'
 import { LoginPage } from './pages/MyPage/view/LoginPage'
 import { MyPage } from './pages/MyPage/view/MyPage'
@@ -18,12 +19,13 @@ export function App() {
                 {/* Mobile App Container Wrapper */}
                 <div className="min-h-screen bg-gray-100 flex justify-center">
                     <div className="relative w-full max-w-md h-screen bg-background flex flex-col overflow-hidden">
+                        <RouteIndicator />
                         <div className="flex-1 overflow-y-auto pb-20 relative hide-scrollbar">
                             <Routes>
                                 <Route path="/" element={<HomePage />} />
                                 <Route path="/test" element={<TestPage />} />
                                 <Route path="/result/:type" element={<ResultPage />} />
-                                <Route path="/place/:id" element={<DetailPage />} />
+                                <Route path="/place/:id" element={<DetailPostPage />} />
                                 <Route path="/community" element={<CommunityPage />} />
                                 <Route path="/community/:postId" element={<DetailPostPage />} />
                                 <Route path="/login" element={<LoginPage />} />
