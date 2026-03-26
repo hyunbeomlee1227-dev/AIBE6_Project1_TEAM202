@@ -60,6 +60,7 @@ export const CommunityPage: React.FC = () => {
         )
     }
 
+    // 북마크 함수 구현
     const handleBookmarkClick = (postId: string) => {
         if (!isAuthenticated) {
             setIsLoginModalOpen(true)
@@ -131,7 +132,7 @@ export const CommunityPage: React.FC = () => {
                         <PostCard
                             post={post}
                             onLikeClick={() => handleLikeClick(post.id)}
-                            onBookmarkClick={() => handleBookmarkClick(post.id)}
+                            onBookmarkClick={() => handleBookmarkClick(post.id)} // 북마크 함수 적용
                         />
                     </motion.div>
                 ))}
