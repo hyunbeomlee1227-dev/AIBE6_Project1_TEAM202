@@ -10,7 +10,7 @@ export const CreatePostPage: React.FC = () => {
     const { isAuthenticated, user } = useAuth()
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
-    const [selectedType, setSelectedType] = useState<TravelType>(user?.travelType || 'HEALING')
+    const [selectedType, setSelectedType] = useState<TravelType>('HEALING')
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     useEffect(() => {
         if (!isAuthenticated) {

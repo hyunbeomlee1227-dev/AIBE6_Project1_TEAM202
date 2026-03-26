@@ -5,31 +5,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LoginPromptModal } from '../../../components/shared/LoginPromptModal'
 import { PostCard } from '../../../components/shared/PostCard'
 import { useAuth } from '../../../contexts/AuthContext'
-import { posts, TravelType } from '../../../data/mockData'
-const filters: {
-    id: TravelType | 'ALL'
-    label: string
-}[] = [
-    {
-        id: 'ALL',
-        label: '전체',
-    },
-    {
-        id: 'HEALING',
-        label: '🌿 힐링',
-    },
-    // {
-    //     id: 'CITY',
-    //     label: '🏙️ 도시',
-    // },
-    {
-        id: 'FOOD',
-        label: '🍜 맛집',
-    },
-    {
-        id: 'PHOTO',
-        label: '📸 포토',
-    },
+import { posts, resultTypes, TravelType } from '../../../data/mockData'
+const filters: { id: TravelType | 'ALL'; label: string }[] = [
+    { id: 'ALL', label: '전체' },
+    ...(Object.keys(resultTypes) as TravelType[]).map((type) => ({
+        id: type,
+        label: `${resultTypes[type].emoji} ${resultTypes[type].title.split(' ')[0]}`,
+    })),
 ]
 
 export const CommunityPage: React.FC = () => {
@@ -139,14 +121,13 @@ export const CommunityPage: React.FC = () => {
                                 onBookmarkClick={(e) => {
                                     e.preventDefault()
                                     handleBookmarkClick(post.id)
-                                }} // 북마크 함수 적용
+                                }}
                             />
                         </Link>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Floating Action Button */}
             <button
                 onClick={handleWriteClick}
                 className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-xl shadow-primary/40 flex items-center justify-center hover:bg-primary-dark hover:scale-110 transition-all z-40 md:bottom-8 md:right-8"
