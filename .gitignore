@@ -25,3 +25,4 @@ src/data/apikey.ts
 *.njsproj
 *.sln
 *.sw?
+.env
