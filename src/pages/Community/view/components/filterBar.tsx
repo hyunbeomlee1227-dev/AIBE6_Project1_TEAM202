@@ -1,11 +1,12 @@
 import React from 'react'
-import { TravelType } from '../../../../data/mockData'
+import { TravelType, resultTypes } from '../../../../data/mockData'
 
 const filters: { id: TravelType | 'ALL'; label: string }[] = [
     { id: 'ALL', label: '전체' },
-    { id: 'HEALING', label: '🌿 힐링' },
-    { id: 'FOOD', label: '🍜 맛집' },
-    { id: 'PHOTO', label: '📸 포토' },
+    ...(Object.keys(resultTypes) as TravelType[]).map((type) => ({
+        id: type,
+        label: `${resultTypes[type].emoji} ${resultTypes[type].title.split(' ')[0]}`,
+    })),
 ]
 
 interface FilterBarProps {
