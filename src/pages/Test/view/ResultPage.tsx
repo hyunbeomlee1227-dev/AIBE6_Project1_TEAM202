@@ -1,5 +1,5 @@
 'use client'
--import { GoogleGenAI } from '@google/genai'
+import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
