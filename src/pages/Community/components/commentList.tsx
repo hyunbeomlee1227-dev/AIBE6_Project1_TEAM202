@@ -1,5 +1,5 @@
 import React from 'react'
-import { Comments } from '../../../../data/mockData'
+import { Comments } from '../../../data/mockData'
 
 interface CommentListProps {
     comments: Comments[]
