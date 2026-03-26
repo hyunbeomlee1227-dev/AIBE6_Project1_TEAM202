@@ -2,8 +2,9 @@
 import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { LoadingSpinner } from '../../../components/shared/LoadingSpinner'
 import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
@@ -24,22 +25,24 @@ export const ResultPage: React.FC = () => {
         else return console.log('AI 응답 실패')
     }
 
+    const [isLoading, setIsLoading] = useState(true)
     const { type } = useParams<{
         type: string
     }>()
     const navigate = useNavigate()
     const result = resultTypes[type as TravelType]
     useEffect(() => {
+        requestGemini(result.title).then((answer) => {
+            console.log(answer)
+            setIsLoading(false)
+        })
         if (!result) {
             navigate('/')
         }
     }, [result, navigate])
 
+    if (isLoading) return <LoadingSpinner />
     if (!result) return null
-
-    const answer = requestGemini(result.title)
-
-    console.log(answer)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
