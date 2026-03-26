@@ -60,6 +60,25 @@ export const CommunityPage: React.FC = () => {
         )
     }
 
+    const handleBookmarkClick = (postId: string) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true)
+            return
+        }
+
+        setAllPosts((prevPosts) =>
+            prevPosts.map((post) => {
+                if (post.id === postId) {
+                    return {
+                        ...post,
+                        isBookmarked: !post.isBookmarked,
+                    }
+                }
+                return post
+            }),
+        )
+    }
+
     const handleWriteClick = () => {
         if (isAuthenticated) {
             navigate('/create-post')
@@ -67,11 +86,7 @@ export const CommunityPage: React.FC = () => {
             setIsLoginModalOpen(true)
         }
     }
-    const handleProtectedAction = () => {
-        if (!isAuthenticated) {
-            setIsLoginModalOpen(true)
-        }
-    }
+
     return (
         <div className="min-h-full bg-background pb-24 pt-6 relative">
             <div className="px-6 mb-6 flex justify-between items-end">
@@ -116,7 +131,7 @@ export const CommunityPage: React.FC = () => {
                         <PostCard
                             post={post}
                             onLikeClick={() => handleLikeClick(post.id)}
-                            onBookmarkClick={handleProtectedAction}
+                            onBookmarkClick={() => handleBookmarkClick(post.id)}
                         />
                     </motion.div>
                 ))}
