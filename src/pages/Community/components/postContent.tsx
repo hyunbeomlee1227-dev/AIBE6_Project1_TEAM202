@@ -1,6 +1,6 @@
 import { BookmarkIcon, HeartIcon, MessageCircleIcon } from 'lucide-react'
 import React from 'react'
-import { Post, resultTypes } from '../../../../data/mockData'
+import { Post, resultTypes } from '../../../data/mockData'
 
 interface PostContentProps {
     post: Post

@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { PostCard } from '../../../../components/shared/PostCard'
-import { Post } from '../../../../data/mockData'
+import { PostCard } from '../../../components/shared/PostCard'
+import { Post } from '../../../data/mockData'
 
 interface PostFeedProps {
     posts: Post[]

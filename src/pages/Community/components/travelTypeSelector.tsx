@@ -1,5 +1,5 @@
 import React from 'react'
-import { TravelType, resultTypes } from '../../../../data/mockData'
+import { TravelType, resultTypes } from '../../../data/mockData'
 
 interface TravelTypeSelectorProps {
     selectedType: TravelType
