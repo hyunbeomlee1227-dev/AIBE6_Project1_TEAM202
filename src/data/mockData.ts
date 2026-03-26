@@ -10,6 +10,7 @@ export type AnswerOption = {
 export interface Question {
     id: number
     question: string
+    imageUrl: string
     options: AnswerOption[]
 }
 
@@ -68,6 +69,7 @@ export const questions: Question[] = [
     {
         id: 1,
         question: '오랜만에 찾아온 휴가, 당신은 어떤 여행을 떠나고 싶나요?',
+        imageUrl: '/images/test/healing.png',
         options: [
             { text: '조용한 숲속 숙소에서 하루종일 뒹굴거리기', score: { HEALING: 2, CALM: 2 } },
             { text: '새로 생긴 핫플레이스와 전시회 투어하기', score: { SHOPPING: 3 } },
@@ -78,6 +80,7 @@ export const questions: Question[] = [
     {
         id: 2,
         question: '짐을 싸며 떠올린 이번 여행의 분위기는?',
+        imageUrl: '/images/test/calm.png',
         options: [
             { text: '조용하고 나만의 시간을 보내는 여행', score: { CALM: 3, HEALING: 1 } },
             { text: '사람 많은 곳에서 에너지를 느끼는 여행', score: { SHOPPING: 2, EXPLORER: 1 } },
@@ -88,6 +91,7 @@ export const questions: Question[] = [
     {
         id: 3,
         question: '여행지에 도착했다! 가장 먼저 하는 행동은?',
+        imageUrl: '/images/test/explorer.png',
         options: [
             { text: '주변 자연을 천천히 산책한다', score: { HEALING: 2, CALM: 2 } },
             { text: '분위기 좋은 카페부터 찾아간다', score: { PHOTO: 2, HEALING: 1 } },
@@ -98,6 +102,7 @@ export const questions: Question[] = [
     {
         id: 4,
         question: '배가 고파졌다. 당신의 선택은?',
+        imageUrl: '/images/test/food.png',
         options: [
             { text: '조용한 분위기의 브런치 카페', score: { HEALING: 2, PHOTO: 1 } },
             { text: 'SNS에서 핫한 웨이팅 맛집', score: { FOOD: 2, SHOPPING: 1 } },
@@ -108,6 +113,7 @@ export const questions: Question[] = [
     {
         id: 5,
         question: '오후에는 어떻게 시간을 보낼까?',
+        imageUrl: '/images/test/shopping.png',
         options: [
             { text: '공원이나 바다에서 여유롭게 시간 보내기', score: { HEALING: 2, CALM: 2 } },
             { text: '쇼핑 거리나 팝업스토어 구경', score: { SHOPPING: 3 } },
@@ -118,6 +124,7 @@ export const questions: Question[] = [
     {
         id: 6,
         question: '길을 잃었다! 당신의 반응은?',
+        imageUrl: '/images/test/explorer.png',
         options: [
             { text: '이것도 여행이지, 그냥 계속 걸어본다', score: { EXPLORER: 3 } },
             { text: '지도 앱으로 빠르게 해결한다', score: { HEALING: 1, CALM: 1 } },
@@ -128,6 +135,7 @@ export const questions: Question[] = [
     {
         id: 7,
         question: '숙소를 고를 때 가장 중요하게 생각하는 것은?',
+        imageUrl: '/images/test/healing.png',
         options: [
             { text: '자연이 보이는 탁 트인 뷰와 조용한 환경', score: { HEALING: 2, CALM: 2 } },
             { text: '교통이 편리하고 번화가와 가까운 위치', score: { SHOPPING: 3 } },
@@ -138,6 +146,7 @@ export const questions: Question[] = [
     {
         id: 8,
         question: '여행 중 갑자기 비가 온다면?',
+        imageUrl: '/images/test/calm.png',
         options: [
             { text: '숙소에서 빗소리를 들으며 따뜻한 차 마시기', score: { CALM: 3, HEALING: 1 } },
             { text: '실내 쇼핑몰이나 대형 미술관으로 일정 변경', score: { SHOPPING: 2, PHOTO: 1 } },
@@ -148,6 +157,7 @@ export const questions: Question[] = [
     {
         id: 9,
         question: '누구와 함께 여행하고 있나요?',
+        imageUrl: '/images/test/photo.png',
         options: [
             { text: '혼자 여행, 나만의 페이스로', score: { CALM: 3, HEALING: 1 } },
             { text: '둘이서 조용히 감성 여행', score: { PHOTO: 2, HEALING: 1 } },
@@ -158,6 +168,7 @@ export const questions: Question[] = [
     {
         id: 10,
         question: '여행 마지막 밤, 당신은 무엇을 하고 있나요?',
+        imageUrl: '/images/test/photo.png',
         options: [
             { text: '바다나 공원에 앉아 여유롭게 윤슬 감상하기', score: { HEALING: 2, CALM: 2 } },
             { text: '마지막까지 쇼핑과 야경 즐기기', score: { SHOPPING: 3 } },

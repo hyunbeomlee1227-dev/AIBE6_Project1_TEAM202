@@ -33,14 +33,11 @@ const priorityOrder: TravelType[] = ['CALM', 'HEALING', 'FOOD', 'PHOTO', 'SHOPPI
 export const TestPage: React.FC = () => {
     const navigate = useNavigate()
     const [currentIndex, setCurrentIndex] = useState(0)
-    // answers: 기존 TravelType[] → AnswerOption[] 으로 변경
-    // 이유: 각 답변의 점수(score)를 보존해야 calculateScores에서 합산 가능
+
     const [answers, setAnswers] = useState<AnswerOption[]>([])
     const [direction, setDirection] = useState(1)
     const currentQuestion = questions[currentIndex]
 
-    // handleAnswer: 기존 type: TravelType → option: AnswerOption으로 변경
-    // 이유: 답변 선택 시 점수 정보를 포함한 전체 옵션 객체를 저장해야 하기 때문
     const handleAnswer = (option: AnswerOption) => {
         const newAnswers = [...answers, option]
         setAnswers(newAnswers)
@@ -111,6 +108,11 @@ export const TestPage: React.FC = () => {
                         }}
                         className="w-full"
                     >
+                        <img
+                            src={currentQuestion.imageUrl}
+                            alt=""
+                            className="w-full h-full object-cover rounded-2xl mb-6"
+                        />
                         {/* currentQuestion.text → currentQuestion.question 으로 변경 (새 Question 타입 구조) */}
                         <h2 className="text-2xl font-bold text-text mb-10 text-center text-balance leading-relaxed">
                             {currentQuestion.question}
