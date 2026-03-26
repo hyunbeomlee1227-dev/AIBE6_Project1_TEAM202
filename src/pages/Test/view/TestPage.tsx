@@ -3,7 +3,8 @@ import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
-import { AnswerOption, questions, TravelType } from '../../../data/mockData'
+import { AnswerOption, TravelType } from '../../../data/mockData'
+import { questions } from '../../../data/mock/questions'
 import { ProgressBar } from '../component/ProgressBar'
 
 // 점수 초기값: TravelType 6개 모두 0점에서 시작
