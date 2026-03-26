@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PlaceCard } from '../../../components/Shared/PlaceCard'
+import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 // import { Gemini_API_KEY } from '../../../data/apikey'
@@ -27,7 +27,9 @@ export const ResultPage: React.FC = () => {
         type: string
     }>()
     const navigate = useNavigate()
+    // 2. 추출한 type 글자를 이용해 전체 결과 데이터(resultTypes)에서 상세 정보 객체를 찾아옴
     const result = resultTypes[type as TravelType]
+    // 3. [방어 로직] 만약 사용자가 주소창에 잘못된 값을 쳐서 결과 데이터가 없다면?
     useEffect(() => {
         if (!result) {
             navigate('/')

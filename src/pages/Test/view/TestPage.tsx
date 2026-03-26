@@ -3,37 +3,57 @@ import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
-import { questions, TravelType } from '../../../data/mockData'
+import { AnswerOption, questions, TravelType } from '../../../data/mockData'
 import { ProgressBar } from '../component/ProgressBar'
+
+// 점수 초기값: TravelType 6개 모두 0점에서 시작
+const initialScores: Record<TravelType, number> = {
+    HEALING: 0,
+    CALM: 0,
+    SHOPPING: 0,
+    EXPLORER: 0,
+    FOOD: 0,
+    PHOTO: 0,
+}
+
+// 점수 합산 함수: 선택한 답변들의 score를 모두 더해 최종 점수표 반환
+function calculateScores(selectedOptions: AnswerOption[]): Record<TravelType, number> {
+    const result = { ...initialScores }
+    selectedOptions.forEach((option) => {
+        Object.entries(option.score).forEach(([key, value]) => {
+            result[key as TravelType] += value ?? 0
+        })
+    })
+    return result
+}
+
+// 동점 처리 기준: TravelType 점수가 같을 경우 앞에 있는 타입이 우선
+const priorityOrder: TravelType[] = ['CALM', 'HEALING', 'FOOD', 'PHOTO', 'SHOPPING', 'EXPLORER']
+
 export const TestPage: React.FC = () => {
     const navigate = useNavigate()
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [answers, setAnswers] = useState<TravelType[]>([])
+
+    const [answers, setAnswers] = useState<AnswerOption[]>([])
     const [direction, setDirection] = useState(1)
     const currentQuestion = questions[currentIndex]
-    const handleAnswer = (type: TravelType) => {
-        const newAnswers = [...answers, type]
+
+    const handleAnswer = (option: AnswerOption) => {
+        const newAnswers = [...answers, option]
         setAnswers(newAnswers)
         if (currentIndex < questions.length - 1) {
             setDirection(1)
             setCurrentIndex(currentIndex + 1)
         } else {
-            // Calculate result
-            const counts = newAnswers.reduce(
-                (acc, curr) => {
-                    acc[curr] = (acc[curr] || 0) + 1
-                    return acc
-                },
-                {} as Record<TravelType, number>,
-            )
-            const resultType = Object.keys(counts).reduce((a, b) =>
-                counts[a as TravelType] > counts[b as TravelType] ? a : b,
-            ) as TravelType
-            navigate(`/result/${resultType}`, {
-                replace: true,
-            })
+            const scores = calculateScores(newAnswers)
+            const maxScore = Math.max(...Object.values(scores))
+            const topKeys = (Object.keys(scores) as TravelType[]).filter((k) => scores[k] === maxScore)
+            const resultType = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
+            navigate(`/result/${resultType}`, { replace: true })
         }
     }
+
+    // 뒤로가기 처리 로직
     const handleBack = () => {
         if (currentIndex > 0) {
             setDirection(-1)
@@ -43,6 +63,8 @@ export const TestPage: React.FC = () => {
             navigate(-1)
         }
     }
+
+    // 화면전환 시 애니메이션 설정
     const variants = {
         enter: (direction: number) => ({
             x: direction > 0 ? 100 : -100,
@@ -57,6 +79,7 @@ export const TestPage: React.FC = () => {
             opacity: 0,
         }),
     }
+
     return (
         <div className="min-h-full bg-background flex flex-col pt-6 px-6 pb-12">
             <div className="flex items-center mb-6">
@@ -85,8 +108,14 @@ export const TestPage: React.FC = () => {
                         }}
                         className="w-full"
                     >
+                        <img
+                            src={currentQuestion.imageUrl}
+                            alt=""
+                            className="w-full h-full object-cover rounded-2xl mb-6"
+                        />
+                        {/* currentQuestion.text → currentQuestion.question 으로 변경 (새 Question 타입 구조) */}
                         <h2 className="text-2xl font-bold text-text mb-10 text-center text-balance leading-relaxed">
-                            {currentQuestion.text}
+                            {currentQuestion.question}
                         </h2>
 
                         <div className="space-y-4">
@@ -94,7 +123,8 @@ export const TestPage: React.FC = () => {
                                 <Card
                                     key={idx}
                                     hoverable
-                                    onClick={() => handleAnswer(option.type)}
+                                    // option.type → option 전체 객체 전달 (score 포함)
+                                    onClick={() => handleAnswer(option)}
                                     className="p-5 cursor-pointer border border-transparent hover:border-primary-light hover:bg-primary/5 transition-all active:scale-95"
                                 >
                                     <p className="text-center font-medium text-text">{option.text}</p>
