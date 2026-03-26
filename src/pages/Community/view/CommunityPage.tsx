@@ -1,36 +1,11 @@
-import { motion } from 'framer-motion'
-import { Edit3Icon } from 'lucide-react'
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { LoginPromptModal } from '../../../components/shared/LoginPromptModal'
-import { PostCard } from '../../../components/shared/PostCard'
 import { useAuth } from '../../../contexts/AuthContext'
 import { posts, TravelType } from '../../../data/mockData'
-const filters: {
-    id: TravelType | 'ALL'
-    label: string
-}[] = [
-    {
-        id: 'ALL',
-        label: '전체',
-    },
-    {
-        id: 'HEALING',
-        label: '🌿 힐링',
-    },
-    // {
-    //     id: 'CITY',
-    //     label: '🏙️ 도시',
-    // },
-    {
-        id: 'FOOD',
-        label: '🍜 맛집',
-    },
-    {
-        id: 'PHOTO',
-        label: '📸 포토',
-    },
-]
+import { FilterBar } from '../components/filterBar'
+import { PostFeed } from '../components/postFeed'
+import { WriteButton } from '../components/writeButton'
 
 export const CommunityPage: React.FC = () => {
     const navigate = useNavigate()
@@ -38,6 +13,7 @@ export const CommunityPage: React.FC = () => {
     const [activeFilter, setActiveFilter] = useState<TravelType | 'ALL'>('ALL')
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [allPosts, setAllPosts] = useState(posts)
+
     const filteredPosts = activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.type === activeFilter)
 
     const handleLikeClick = (postId: string) => {
@@ -45,38 +21,26 @@ export const CommunityPage: React.FC = () => {
             setIsLoginModalOpen(true)
             return
         }
-
         setAllPosts((prevPosts) =>
-            prevPosts.map((post) => {
-                if (post.id === postId) {
-                    return {
-                        ...post,
-                        isLiked: !post.isLiked,
-                        likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
-                    }
-                }
-                return post
-            }),
+            prevPosts.map((post) =>
+                post.id === postId
+                    ? {
+                          ...post,
+                          isLiked: !post.isLiked,
+                          likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+                      }
+                    : post,
+            ),
         )
     }
 
-    // 북마크 함수 구현
     const handleBookmarkClick = (postId: string) => {
         if (!isAuthenticated) {
             setIsLoginModalOpen(true)
             return
         }
-
         setAllPosts((prevPosts) =>
-            prevPosts.map((post) => {
-                if (post.id === postId) {
-                    return {
-                        ...post,
-                        isBookmarked: !post.isBookmarked,
-                    }
-                }
-                return post
-            }),
+            prevPosts.map((post) => (post.id === postId ? { ...post, isBookmarked: !post.isBookmarked } : post)),
         )
     }
 
@@ -97,63 +61,11 @@ export const CommunityPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="px-6 mb-6 overflow-x-auto hide-scrollbar">
-                <div className="flex gap-2 pb-2">
-                    {filters.map((filter) => (
-                        <button
-                            key={filter.id}
-                            onClick={() => setActiveFilter(filter.id)}
-                            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeFilter === filter.id ? 'bg-text text-white' : 'bg-white text-text-muted border border-gray-100 hover:bg-gray-50'}`}
-                        >
-                            {filter.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-            {/* Feed */}
-            <div className="px-4 space-y-6">
-                {filteredPosts.map((post, idx) => (
-                    <motion.div
-                        key={post.id}
-                        initial={{
-                            opacity: 0,
-                            y: 20,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            y: 0,
-                        }}
-                        transition={{
-                            delay: idx * 0.1,
-                        }}
-                    >
-                        <Link to={`/community/${post.id}`}>
-                            <PostCard
-                                post={post}
-                                onLikeClick={(e) => {
-                                    e.preventDefault()
-                                    handleLikeClick(post.id)
-                                }}
-                                onBookmarkClick={(e) => {
-                                    e.preventDefault()
-                                    handleBookmarkClick(post.id)
-                                }} // 북마크 함수 적용
-                            />
-                        </Link>
-                    </motion.div>
-                ))}
-            </div>
+            <PostFeed posts={filteredPosts} onLikeClick={handleLikeClick} onBookmarkClick={handleBookmarkClick} />
 
-            {/* Floating Action Button */}
-            <button
-                onClick={handleWriteClick}
-                className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-xl shadow-primary/40 flex items-center justify-center hover:bg-primary-dark hover:scale-110 transition-all z-40 md:bottom-8 md:right-8"
-                aria-label="글쓰기"
-            >
-                <Edit3Icon className="w-6 h-6" />
-            </button>
+            <WriteButton onClick={handleWriteClick} />
 
             <LoginPromptModal
                 isOpen={isLoginModalOpen}
