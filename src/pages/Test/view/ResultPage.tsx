@@ -1,5 +1,4 @@
 'use client'
-import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
@@ -7,23 +6,22 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PlaceCard } from '../../../components/Shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { Gemini_API_KEY } from '../../../data/apikey'
+// import { Gemini_API_KEY } from '../../../data/apikey'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
-import createPlacecPrompt from '../../../data/prompt'
 
 export const ResultPage: React.FC = () => {
-    async function requestGemini(request: string) {
-        const ai = new GoogleGenAI({ apiKey: Gemini_API_KEY })
-        const prompt = createPlacecPrompt(request)
+    // async function requestGemini(request: string) {
+    //     const ai = new GoogleGenAI({ apiKey: Gemini_API_KEY })
+    //     const prompt = createPlacecPrompt(request)
 
-        const result = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        })
+    //     const result = await ai.models.generateContent({
+    //         model: 'gemini-2.5-flash',
+    //         contents: prompt,
+    //     })
 
-        if (result !== undefined) return result.text
-        else return console.log('AI 응답 실패')
-    }
+    //     if (result !== undefined) return result.text
+    //     else return console.log('AI 응답 실패')
+    // }
 
     const { type } = useParams<{
         type: string
@@ -38,7 +36,7 @@ export const ResultPage: React.FC = () => {
 
     if (!result) return null
 
-    const answer = requestGemini(result.title)
+    // const answer = requestGemini(result.title)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
