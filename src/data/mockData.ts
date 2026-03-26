@@ -65,7 +65,6 @@ export interface Comments {
     createdAt: string
 }
 
-export { questions } from './mock/questions'
 export { resultTypes } from './mock/resultTypes'
 
 export const places: Place[] = [
