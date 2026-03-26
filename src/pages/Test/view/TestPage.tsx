@@ -3,43 +3,32 @@ import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
-import { AnswerOption, questions, ScoreKey, TravelType } from '../../../data/mockData'
+import { AnswerOption, questions, TravelType } from '../../../data/mockData'
 import { ProgressBar } from '../component/ProgressBar'
 
-// 점수 초기값: ScoreKey 6개 모두 0점에서 시작
-const initialScores: Record<ScoreKey, number> = {
-    healing: 0,
-    calm: 0,
-    shopping: 0,
-    explorer: 0,
-    foodie: 0,
-    photo: 0,
+// 점수 초기값: TravelType 6개 모두 0점에서 시작
+const initialScores: Record<TravelType, number> = {
+    HEALING: 0,
+    CALM: 0,
+    SHOPPING: 0,
+    EXPLORER: 0,
+    FOOD: 0,
+    PHOTO: 0,
 }
 
 // 점수 합산 함수: 선택한 답변들의 score를 모두 더해 최종 점수표 반환
-function calculateScores(selectedOptions: AnswerOption[]): Record<ScoreKey, number> {
+function calculateScores(selectedOptions: AnswerOption[]): Record<TravelType, number> {
     const result = { ...initialScores }
     selectedOptions.forEach((option) => {
         Object.entries(option.score).forEach(([key, value]) => {
-            result[key as ScoreKey] += value ?? 0
+            result[key as TravelType] += value ?? 0
         })
     })
     return result
 }
 
-// ScoreKey → TravelType 매핑: 6개 세분화 점수를 4개 결과 타입으로 변환
-// healing/calm → HEALING, shopping/explorer → CITY, foodie → FOOD, photo → PHOTO
-const scoreKeyToTravelType: Record<ScoreKey, TravelType> = {
-    healing: 'HEALING',
-    calm: 'CALM',
-    shopping: 'CITY',
-    explorer: 'EXPLORER',
-    foodie: 'FOOD',
-    photo: 'PHOTO',
-}
-
-// 동점 처리 기준: ScoreKey 점수가 같을 경우 앞에 있는 타입이 우선
-const priorityOrder: ScoreKey[] = ['calm', 'healing', 'foodie', 'photo', 'shopping', 'explorer']
+// 동점 처리 기준: TravelType 점수가 같을 경우 앞에 있는 타입이 우선
+const priorityOrder: TravelType[] = ['CALM', 'HEALING', 'FOOD', 'PHOTO', 'SHOPPING', 'EXPLORER']
 
 export const TestPage: React.FC = () => {
     const navigate = useNavigate()
@@ -59,14 +48,10 @@ export const TestPage: React.FC = () => {
             setDirection(1)
             setCurrentIndex(currentIndex + 1)
         } else {
-            // calculateScores로 점수 합산 후 가장 높은 ScoreKey 결정
             const scores = calculateScores(newAnswers)
             const maxScore = Math.max(...Object.values(scores))
-            // 동점인 ScoreKey들 추출 후 priorityOrder 기준으로 정렬해 1위 선택
-            const topKeys = (Object.keys(scores) as ScoreKey[]).filter((k) => scores[k] === maxScore)
-            const topScoreKey = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
-            // ScoreKey → TravelType 변환 후 결과 페이지로 이동
-            const resultType = scoreKeyToTravelType[topScoreKey]
+            const topKeys = (Object.keys(scores) as TravelType[]).filter((k) => scores[k] === maxScore)
+            const resultType = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
             navigate(`/result/${resultType}`, { replace: true })
         }
     }
