@@ -55,7 +55,9 @@ export const TestPage: React.FC = () => {
             const resultType = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
 
             try {
-                await saveTestResult(resultType, user?.id)
+                console.log('저장 직전 resultType:', resultType)
+                await saveTestResult(resultType, user?.id ?? null)
+                console.log('저장 성공')
             } catch (error) {
                 console.error('테스트 결과 저장 실패', error)
             }
