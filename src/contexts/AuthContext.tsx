@@ -1,64 +1,129 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { User, mockUsers } from '../data/mockData'
+import React, { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
+
 interface AuthContextType {
     user: User | null
+    session: Session | null
     isAuthenticated: boolean
-    login: (email: string) => void
-    signup: (email: string, nickname: string) => void
-    logout: () => void
+    isLoading: boolean
+    displayName: string
+    profileImage: string | null
+    loginWithKakao: () => Promise<void>
+    logout: () => Promise<void>
 }
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-export const AuthProvider: React.FC<{
-    children: ReactNode
-}> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null)
-    useEffect(() => {
-        const storedUser = localStorage.getItem('poomang_user')
-        if (storedUser) {
-            setUser(JSON.parse(storedUser))
-        }
-    }, [])
-    const login = (email: string) => {
-        // Mock login: find user or use default
-        const foundUser = mockUsers.find((u) => u.email === email) || mockUsers[0]
-        setUser(foundUser)
-        localStorage.setItem('poomang_user', JSON.stringify(foundUser))
-    }
-    const signup = (email: string, nickname: string) => {
-        // Mock signup: create new user
-        const newUser: User = {
-            id: `u_${Date.now()}`,
-            email,
-            nickname,
-            avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
-            travelType: 'HEALING',
-            createdAt: new Date().toISOString(),
-        }
-        setUser(newUser)
-        localStorage.setItem('poomang_user', JSON.stringify(newUser))
-    }
-    const logout = () => {
-        setUser(null)
-        localStorage.removeItem('poomang_user')
-    }
+
+const getDisplayName = (user: User | null) => {
+    if (!user) return ''
+
     return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isAuthenticated: !!user,
-                login,
-                signup,
-                logout,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
+        user.user_metadata?.nickname ||
+        user.user_metadata?.name ||
+        user.user_metadata?.full_name ||
+        user.user_metadata?.user_name ||
+        user.email?.split('@')[0] ||
+        '사용자'
     )
 }
+
+const getProfileImage = (user: User | null) => {
+    if (!user) return null
+
+    return user.user_metadata?.avatar_url || user.user_metadata?.picture || user.user_metadata?.profile_image || null
+}
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [session, setSession] = useState<Session | null>(null)
+    const [user, setUser] = useState<User | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        const initializeAuth = async () => {
+            try {
+                const {
+                    data: { session },
+                    error,
+                } = await supabase.auth.getSession()
+
+                if (error) {
+                    console.error('세션 조회 실패:', error.message)
+                }
+
+                setSession(session)
+                setUser(session?.user ?? null)
+            } catch (error) {
+                console.error('초기 인증 상태 확인 중 오류:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        initializeAuth()
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session)
+            setUser(session?.user ?? null)
+            setIsLoading(false)
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
+    }, [])
+
+    const loginWithKakao = async () => {
+        const redirectTo = `${window.location.origin}/my`
+
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'kakao',
+            options: {
+                redirectTo,
+            },
+        })
+
+        if (error) {
+            throw error
+        }
+    }
+
+    const logout = async () => {
+        const { error } = await supabase.auth.signOut()
+
+        if (error) {
+            throw error
+        }
+
+        setSession(null)
+        setUser(null)
+    }
+
+    const value = useMemo(
+        () => ({
+            user,
+            session,
+            isAuthenticated: !!user,
+            isLoading,
+            displayName: getDisplayName(user),
+            profileImage: getProfileImage(user),
+            loginWithKakao,
+            logout,
+        }),
+        [user, session, isLoading],
+    )
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
 export const useAuth = () => {
     const context = useContext(AuthContext)
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider')
+
+    if (!context) {
+        throw new Error('useAuth는 AuthProvider 내부에서 사용해야 합니다.')
     }
+
     return context
 }

@@ -1,123 +1,161 @@
-import { motion } from 'framer-motion'
-import { LogOutIcon, SettingsIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { BookmarkIcon, LogOutIcon, MapPinIcon, UserIcon } from 'lucide-react'
 import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { PostCard } from '../../../components/shared/PostCard'
 import { Button } from '../../../components/ui/Button'
 import { useAuth } from '../../../contexts/AuthContext'
-import { places, posts, resultTypes } from '../../../data/mockData'
+import { Card } from '../../../components/ui/Card'
+
 export const MyPage: React.FC = () => {
-    const { user, logout, isAuthenticated } = useAuth()
     const navigate = useNavigate()
-    const [activeTab, setActiveTab] = useState<'saved' | 'posts'>('saved')
-    // Redirect if not logged in
+    const { user, logout, isAuthenticated, isLoading, displayName, profileImage } = useAuth()
+
+    const [activeTab, setActiveTab] = useState<'bookmarks' | 'posts'>('bookmarks')
+
+    const mockBookmarks = useMemo(
+        () => [
+            { id: 1, title: '제주도 협재 해변', subtitle: '맑은 바다와 여유로운 풍경' },
+            { id: 2, title: '강릉 안목해변', subtitle: '카페거리와 바다가 함께' },
+        ],
+        [],
+    )
+
+    const mockPosts = useMemo(
+        () => [
+            { id: 1, title: '혼자 다녀온 부산 여행 후기' },
+            { id: 2, title: '제주 렌터카 없이 여행하는 법' },
+        ],
+        [],
+    )
+
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!isLoading && !isAuthenticated) {
             navigate('/login')
         }
-    }, [isAuthenticated, navigate])
-    if (!user) return null
-    const travelTypeInfo = resultTypes[user.travelType]
-    const savedPlaces = places.slice(0, 2) // Mock saved places
-    const userPosts = posts.filter((p) => p.author.id === user.id) // Mock user posts
-    const handleLogout = () => {
-        logout()
-        navigate('/')
+    }, [isAuthenticated, isLoading, navigate])
+
+    if (isLoading) {
+        return (
+            <div className="min-h-full flex items-center justify-center">
+                <p className="text-sm text-text-muted">사용자 정보를 불러오는 중...</p>
+            </div>
+        )
     }
+
+    if (!user) {
+        return null
+    }
+
+    const email = user.email ?? '이메일 정보 없음'
+    const avatarSrc = profileImage || 'https://i.pravatar.cc/150?img=12'
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            navigate('/')
+        } catch (error) {
+            console.error('로그아웃 실패:', error)
+        }
+    }
+
     return (
         <div className="min-h-full bg-background pb-24">
-            {/* Profile Header */}
-            <div className="bg-white pt-12 pb-8 px-6 rounded-b-[2rem] shadow-sm mb-6">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-background shadow-sm">
-                        <img src={user.avatar} alt={user.nickname} className="w-full h-full object-cover" />
+            <div className="px-6 pt-8 pb-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-4"
+                >
+                    <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                        <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
                     </div>
-                    <button className="p-2 text-text-muted hover:text-text bg-gray-50 rounded-full transition-colors">
-                        <SettingsIcon className="w-5 h-5" />
-                    </button>
-                </div>
 
-                <h1 className="text-2xl font-bold text-text mb-2">{user.nickname}</h1>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-2xl font-bold text-text mb-1 truncate">{displayName}</h1>
+                        <p className="text-sm text-text-muted truncate">{email}</p>
 
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mb-4">
-                    <span className="text-lg">{travelTypeInfo.emoji}</span>
-                    <span className="text-sm font-bold text-text">{travelTypeInfo.title}</span>
-                </div>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">
+                            <UserIcon className="w-4 h-4 text-text-muted" />
+                            <span className="text-sm font-bold text-text">여행 성향 준비 중</span>
+                        </div>
+                    </div>
+                </motion.div>
 
-                <p className="text-sm text-text-muted mb-6">{user.email}</p>
-
-                <div className="flex gap-3">
-                    <Button variant="outline" fullWidth className="py-2.5 text-sm" onClick={() => navigate('/test')}>
-                        테스트 다시하기
-                    </Button>
-                    <Button
-                        variant="primary"
-                        fullWidth
-                        className="py-2.5 text-sm"
-                        onClick={() => navigate(`/result/${user.travelType}`)}
-                    >
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                    <Button variant="primary" fullWidth className="py-2.5 text-sm" onClick={() => navigate('/test')}>
                         내 결과 보기
                     </Button>
+
+                    <Button variant="secondary" fullWidth className="py-2.5 text-sm" onClick={handleLogout}>
+                        로그아웃
+                    </Button>
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="px-6 mb-6 flex gap-6 border-b border-gray-200">
-                <button
-                    className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === 'saved' ? 'text-text' : 'text-text-muted'}`}
-                    onClick={() => setActiveTab('saved')}
-                >
-                    저장한 장소
-                    {activeTab === 'saved' && (
-                        <motion.div
-                            layoutId="tab-indicator"
-                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-text"
-                        />
-                    )}
-                </button>
-                <button
-                    className={`pb-3 text-sm font-bold transition-colors relative ${activeTab === 'posts' ? 'text-text' : 'text-text-muted'}`}
-                    onClick={() => setActiveTab('posts')}
-                >
-                    내 게시글
-                    {activeTab === 'posts' && (
-                        <motion.div
-                            layoutId="tab-indicator"
-                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-text"
-                        />
-                    )}
-                </button>
+            <div className="px-6 mb-4">
+                <div className="grid grid-cols-2 bg-gray-100 rounded-2xl p-1">
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('bookmarks')}
+                        className={`py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                            activeTab === 'bookmarks' ? 'bg-white text-text shadow-sm' : 'text-text-muted'
+                        }`}
+                    >
+                        저장한 장소
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('posts')}
+                        className={`py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                            activeTab === 'posts' ? 'bg-white text-text shadow-sm' : 'text-text-muted'
+                        }`}
+                    >
+                        내 게시글
+                    </button>
+                </div>
             </div>
 
-            {/* Tab Content */}
-            <div className="px-6 space-y-4">
-                {activeTab === 'saved' ? (
-                    <div className="grid grid-cols-2 gap-4">
-                        {savedPlaces.map((place) => (
-                            <PlaceCard key={place.id} place={place} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {userPosts.length > 0 ? (
-                            userPosts.map((post) => <PostCard key={post.id} post={post} />)
-                        ) : (
-                            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-                                <p className="text-text-muted text-sm mb-4">아직 작성한 게시글이 없어요</p>
-                                <Button variant="outline" size="sm" onClick={() => navigate('/create-post')}>
-                                    첫 글 작성하기
-                                </Button>
+            <div className="px-6 space-y-3">
+                {activeTab === 'bookmarks' &&
+                    mockBookmarks.map((item) => (
+                        <Card key={item.id} className="p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                                    <BookmarkIcon className="w-5 h-5 text-text-muted" />
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="font-bold text-text">{item.title}</h3>
+                                    <p className="text-sm text-text-muted mt-1">{item.subtitle}</p>
+                                </div>
                             </div>
-                        )}
-                    </div>
-                )}
+                        </Card>
+                    ))}
+
+                {activeTab === 'posts' &&
+                    mockPosts.map((item) => (
+                        <Card key={item.id} className="p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                                    <MapPinIcon className="w-5 h-5 text-text-muted" />
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="font-bold text-text">{item.title}</h3>
+                                    <p className="text-sm text-text-muted mt-1">
+                                        실제 게시글 데이터 연결 전 임시 영역입니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
             </div>
 
-            <div className="px-6 mt-12">
+            <div className="px-6 mt-8">
                 <button
+                    type="button"
                     onClick={handleLogout}
-                    className="flex items-center justify-center gap-2 w-full py-3 text-sm font-medium text-text-muted hover:text-red-500 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-500 bg-white border border-red-100 rounded-2xl hover:bg-red-50 transition-colors"
                 >
                     <LogOutIcon className="w-4 h-4" />
                     로그아웃

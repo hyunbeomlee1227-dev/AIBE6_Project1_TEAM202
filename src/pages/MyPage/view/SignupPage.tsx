@@ -4,24 +4,24 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { useAuth } from '../../../contexts/AuthContext'
+
 export const SignupPage: React.FC = () => {
     const navigate = useNavigate()
-    const { signup } = useAuth()
     const [email, setEmail] = useState('')
     const [nickname, setNickname] = useState('')
     const [password, setPassword] = useState('')
+
     const handleSignup = (e: React.FormEvent) => {
         e.preventDefault()
-        if (email && nickname && password) {
-            signup(email, nickname)
-            navigate('/')
-        }
+        alert('현재는 카카오 로그인만 지원합니다.')
+        navigate('/login')
     }
+
     return (
         <div className="min-h-full bg-background flex flex-col">
             <div className="p-4 flex items-center">
                 <button
+                    type="button"
                     onClick={() => navigate(-1)}
                     className="p-2 -ml-2 text-text-muted hover:text-text transition-colors"
                 >
@@ -30,19 +30,13 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 20,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="flex-1 px-6 flex flex-col justify-center pb-12"
             >
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-bold text-text mb-2">환영합니다! ✨</h1>
-                    <p className="text-text-muted text-sm">간단한 정보 입력 후 바로 시작해보세요</p>
+                    <p className="text-text-muted text-sm">현재는 카카오 로그인만 지원합니다</p>
                 </div>
 
                 <Card className="p-6 mb-6">
@@ -58,7 +52,7 @@ export const SignupPage: React.FC = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="hello@poomang.com"
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm"
                                     required
                                 />
                             </div>
@@ -75,7 +69,7 @@ export const SignupPage: React.FC = () => {
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     placeholder="여행러"
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm"
                                     required
                                 />
                             </div>
@@ -92,7 +86,7 @@ export const SignupPage: React.FC = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm"
                                     required
                                 />
                             </div>

@@ -25,4 +25,10 @@ src/data/apikey.ts
 *.njsproj
 *.sln
 *.sw?
+
+# 환경 변수 파일 (절대 업로드 금지)
 .env
+.env.local
+.env.*.local
+
+src/data/apikey.ts
