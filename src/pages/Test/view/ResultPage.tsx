@@ -1,4 +1,5 @@
 'use client'
+import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect } from 'react'
@@ -6,22 +7,22 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-// import { Gemini_API_KEY } from '../../../data/apikey'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
+import createPlacecPrompt from '../../../data/prompt'
 
 export const ResultPage: React.FC = () => {
-    // async function requestGemini(request: string) {
-    //     const ai = new GoogleGenAI({ apiKey: Gemini_API_KEY })
-    //     const prompt = createPlacecPrompt(request)
+    async function requestGemini(request: string) {
+        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! })
+        const prompt = createPlacecPrompt(request)
 
-    //     const result = await ai.models.generateContent({
-    //         model: 'gemini-2.5-flash',
-    //         contents: prompt,
-    //     })
+        const result = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        })
 
-    //     if (result !== undefined) return result.text
-    //     else return console.log('AI 응답 실패')
-    // }
+        if (result !== undefined) return result.text
+        else return console.log('AI 응답 실패')
+    }
 
     const { type } = useParams<{
         type: string
@@ -38,7 +39,9 @@ export const ResultPage: React.FC = () => {
 
     if (!result) return null
 
-    // const answer = requestGemini(result.title)
+    const answer = requestGemini(result.title)
+
+    console.log(answer)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
@@ -131,35 +134,6 @@ export const ResultPage: React.FC = () => {
                         <RotateCcwIcon className="w-5 h-5" />
                     </Button>
                 </motion.div>
-
-                <div className="px-6 space-y-8">
-                    {/* Actions */}
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                        }}
-                        animate={{
-                            opacity: 1,
-                        }}
-                        transition={{
-                            delay: 0.3,
-                        }}
-                        className="flex gap-3"
-                    >
-                        <Button variant="primary" fullWidth className="gap-2 shadow-md shadow-primary/20">
-                            <Share2Icon className="w-5 h-5" />
-                            결과 공유하기
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            className="px-4"
-                            onClick={() => navigate('/test')}
-                            aria-label="다시하기"
-                        >
-                            <RotateCcwIcon className="w-5 h-5" />
-                        </Button>
-                    </motion.div>
-                </div>
 
                 {/* Recommendations */}
                 <motion.div
