@@ -37,7 +37,29 @@ export const CommunityPage: React.FC = () => {
     const { isAuthenticated } = useAuth()
     const [activeFilter, setActiveFilter] = useState<TravelType | 'ALL'>('ALL')
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-    const filteredPosts = activeFilter === 'ALL' ? posts : posts.filter((post) => post.type === activeFilter)
+    const [allPosts, setAllPosts] = useState(posts)
+    const filteredPosts = activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.type === activeFilter)
+
+    const handleLikeClick = (postId: string) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true)
+            return
+        }
+
+        setAllPosts((prevPosts) =>
+            prevPosts.map((post) => {
+                if (post.id === postId) {
+                    return {
+                        ...post,
+                        isLiked: !post.isLiked,
+                        likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+                    }
+                }
+                return post
+            }),
+        )
+    }
+
     const handleWriteClick = () => {
         if (isAuthenticated) {
             navigate('/create-post')
@@ -93,7 +115,7 @@ export const CommunityPage: React.FC = () => {
                     >
                         <PostCard
                             post={post}
-                            onLikeClick={handleProtectedAction}
+                            onLikeClick={() => handleLikeClick(post.id)}
                             onBookmarkClick={handleProtectedAction}
                         />
                     </motion.div>
