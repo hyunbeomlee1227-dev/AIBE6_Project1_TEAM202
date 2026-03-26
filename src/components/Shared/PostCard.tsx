@@ -4,8 +4,8 @@ import { Post, resultTypes } from '../../data/mockData'
 import { Card } from '../ui/Card'
 interface PostCardProps {
     post: Post
-    onLikeClick?: () => void
-    onBookmarkClick?: () => void
+    onLikeClick?: (e: React.MouseEvent) => void
+    onBookmarkClick?: (e: React.MouseEvent) => void
 }
 export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmarkClick }) => {
     const travelTypeInfo = resultTypes[post.type]
