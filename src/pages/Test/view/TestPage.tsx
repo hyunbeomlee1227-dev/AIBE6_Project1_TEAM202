@@ -3,41 +3,74 @@ import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
-import { questions, TravelType } from '../../../data/mockData'
+import { AnswerOption, questions, ScoreKey, TravelType } from '../../../data/mockData'
 import { ProgressBar } from '../component/ProgressBar'
-//리엑트 함수형 컴포넌트 선언
+
+// 점수 초기값: ScoreKey 6개 모두 0점에서 시작
+const initialScores: Record<ScoreKey, number> = {
+    healing: 0,
+    calm: 0,
+    shopping: 0,
+    explorer: 0,
+    foodie: 0,
+    photo: 0,
+}
+
+// 점수 합산 함수: 선택한 답변들의 score를 모두 더해 최종 점수표 반환
+function calculateScores(selectedOptions: AnswerOption[]): Record<ScoreKey, number> {
+    const result = { ...initialScores }
+    selectedOptions.forEach((option) => {
+        Object.entries(option.score).forEach(([key, value]) => {
+            result[key as ScoreKey] += value ?? 0
+        })
+    })
+    return result
+}
+
+// ScoreKey → TravelType 매핑: 6개 세분화 점수를 4개 결과 타입으로 변환
+// healing/calm → HEALING, shopping/explorer → CITY, foodie → FOOD, photo → PHOTO
+const scoreKeyToTravelType: Record<ScoreKey, TravelType> = {
+    healing: 'HEALING',
+    calm: 'CALM',
+    shopping: 'CITY',
+    explorer: 'EXPLORER',
+    foodie: 'FOOD',
+    photo: 'PHOTO',
+}
+
+// 동점 처리 기준: ScoreKey 점수가 같을 경우 앞에 있는 타입이 우선
+const priorityOrder: ScoreKey[] = ['calm', 'healing', 'foodie', 'photo', 'shopping', 'explorer']
+
 export const TestPage: React.FC = () => {
     const navigate = useNavigate()
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [answers, setAnswers] = useState<TravelType[]>([])
+    // answers: 기존 TravelType[] → AnswerOption[] 으로 변경
+    // 이유: 각 답변의 점수(score)를 보존해야 calculateScores에서 합산 가능
+    const [answers, setAnswers] = useState<AnswerOption[]>([])
     const [direction, setDirection] = useState(1)
     const currentQuestion = questions[currentIndex]
 
-    //사용자가 클릭했을 때 답변 처리
-    const handleAnswer = (type: TravelType) => {
-        const newAnswers = [...answers, type]
+    // handleAnswer: 기존 type: TravelType → option: AnswerOption으로 변경
+    // 이유: 답변 선택 시 점수 정보를 포함한 전체 옵션 객체를 저장해야 하기 때문
+    const handleAnswer = (option: AnswerOption) => {
+        const newAnswers = [...answers, option]
         setAnswers(newAnswers)
         if (currentIndex < questions.length - 1) {
             setDirection(1)
             setCurrentIndex(currentIndex + 1)
         } else {
-            // 결과 계산 답변들의 개수를 카운트한다.
-            const counts = newAnswers.reduce(
-                (acc, curr) => {
-                    acc[curr] = (acc[curr] || 0) + 1
-                    return acc
-                },
-                {} as Record<TravelType, number>,
-            )
-            //가장 많은 답변을 가진 여행 타입 찾기(결과 공유하기 로직)
-            const resultType = Object.keys(counts).reduce((a, b) =>
-                counts[a as TravelType] > counts[b as TravelType] ? a : b,
-            ) as TravelType
-            navigate(`/result/${resultType}`, {
-                replace: true,
-            })
+            // calculateScores로 점수 합산 후 가장 높은 ScoreKey 결정
+            const scores = calculateScores(newAnswers)
+            const maxScore = Math.max(...Object.values(scores))
+            // 동점인 ScoreKey들 추출 후 priorityOrder 기준으로 정렬해 1위 선택
+            const topKeys = (Object.keys(scores) as ScoreKey[]).filter((k) => scores[k] === maxScore)
+            const topScoreKey = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
+            // ScoreKey → TravelType 변환 후 결과 페이지로 이동
+            const resultType = scoreKeyToTravelType[topScoreKey]
+            navigate(`/result/${resultType}`, { replace: true })
         }
     }
+
     // 뒤로가기 처리 로직
     const handleBack = () => {
         if (currentIndex > 0) {
@@ -48,6 +81,7 @@ export const TestPage: React.FC = () => {
             navigate(-1)
         }
     }
+
     // 화면전환 시 애니메이션 설정
     const variants = {
         enter: (direction: number) => ({
@@ -63,6 +97,7 @@ export const TestPage: React.FC = () => {
             opacity: 0,
         }),
     }
+
     return (
         <div className="min-h-full bg-background flex flex-col pt-6 px-6 pb-12">
             <div className="flex items-center mb-6">
@@ -91,8 +126,9 @@ export const TestPage: React.FC = () => {
                         }}
                         className="w-full"
                     >
+                        {/* currentQuestion.text → currentQuestion.question 으로 변경 (새 Question 타입 구조) */}
                         <h2 className="text-2xl font-bold text-text mb-10 text-center text-balance leading-relaxed">
-                            {currentQuestion.text}
+                            {currentQuestion.question}
                         </h2>
 
                         <div className="space-y-4">
@@ -100,7 +136,8 @@ export const TestPage: React.FC = () => {
                                 <Card
                                     key={idx}
                                     hoverable
-                                    onClick={() => handleAnswer(option.type)}
+                                    // option.type → option 전체 객체 전달 (score 포함)
+                                    onClick={() => handleAnswer(option)}
                                     className="p-5 cursor-pointer border border-transparent hover:border-primary-light hover:bg-primary/5 transition-all active:scale-95"
                                 >
                                     <p className="text-center font-medium text-text">{option.text}</p>
