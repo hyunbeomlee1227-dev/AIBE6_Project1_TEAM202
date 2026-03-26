@@ -3,6 +3,7 @@ import { BottomNav } from './components/Shared/Navigation'
 import { AuthProvider } from './contexts/AuthContext'
 import { CommunityPage } from './pages/Community/view/CommunityPage'
 import { CreatePostPage } from './pages/Community/view/CreatePostPage'
+import { DetailPostPage } from './pages/Community/view/DetailPostPage'
 import { DetailPage } from './pages/DetailPage'
 import { HomePage } from './pages/Home/HomePage'
 import { LoginPage } from './pages/MyPage/view/LoginPage'
@@ -24,6 +25,7 @@ export function App() {
                                 <Route path="/result/:type" element={<ResultPage />} />
                                 <Route path="/place/:id" element={<DetailPage />} />
                                 <Route path="/community" element={<CommunityPage />} />
+                                <Route path="/community/:postId" element={<DetailPostPage />} />
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/signup" element={<SignupPage />} />
                                 <Route path="/my" element={<MyPage />} />
