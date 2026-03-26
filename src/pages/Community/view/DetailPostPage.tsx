@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { posts } from '../../../data/mockData'
-import { CommentInput } from './components/commentInput'
-import { CommentList } from './components/commentList'
-import { PostContent } from './components/postContent'
+import { CommentInput } from '../components/commentInput'
+import { CommentList } from '../components/commentList'
+import { PostContent } from '../components/postContent'
 
 export const DetailPostPage: React.FC = () => {
     const { postId } = useParams<{ postId: string }>()

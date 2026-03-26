@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { useAuth } from '../../../contexts/AuthContext'
 import { TravelType } from '../../../data/mockData'
-import { ImageUploader } from './components/imageUploader'
-import { PostForm } from './components/postForm'
-import { TravelTypeSelector } from './components/travelTypeSelector'
+import { ImageUploader } from '../components/imageUploader'
+import { PostForm } from '../components/postForm'
+import { TravelTypeSelector } from '../components/travelTypeSelector'
 
 export const CreatePostPage: React.FC = () => {
     const navigate = useNavigate()
