@@ -1,18 +1,26 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BookmarkIcon, LogOutIcon, MapPinIcon, UserIcon } from 'lucide-react'
-import { PlaceCard } from '../../../components/shared/PlaceCard'
-import { PostCard } from '../../../components/shared/PostCard'
+import { BookmarkIcon, LogOutIcon, MapPinIcon, PencilIcon, UserIcon } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card } from '../../../components/ui/Card'
+import { supabase } from '../../../lib/supabase'
+import { EditProfile } from './EditProfile'
+
+type Profile = {
+    id: string
+    nickname: string | null
+    avatar_url: string | null
+    created_at: string
+}
 
 export const MyPage: React.FC = () => {
     const navigate = useNavigate()
     const { user, logout, isAuthenticated, isLoading, displayName, profileImage } = useAuth()
 
     const [activeTab, setActiveTab] = useState<'bookmarks' | 'posts'>('bookmarks')
+    const [profile, setProfile] = useState<Profile | null>(null)
 
     const mockBookmarks = useMemo(
         () => [
@@ -36,6 +44,36 @@ export const MyPage: React.FC = () => {
         }
     }, [isAuthenticated, isLoading, navigate])
 
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) return
+
+            const { data, error } = await supabase
+                .from('users')
+                .select('id, nickname, avatar_url, created_at')
+                .eq('id', user.id)
+                .single()
+
+            if (error) {
+                console.error('프로필 조회 실패:', error)
+                return
+            }
+
+            setProfile(data)
+        }
+
+        fetchProfile()
+    }, [user])
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            navigate('/')
+        } catch (error) {
+            console.error('로그아웃 실패:', error)
+        }
+    }
+
     if (isLoading) {
         return (
             <div className="min-h-full flex items-center justify-center">
@@ -49,16 +87,8 @@ export const MyPage: React.FC = () => {
     }
 
     const email = user.email ?? '이메일 정보 없음'
-    const avatarSrc = profileImage || 'https://i.pravatar.cc/150?img=12'
-
-    const handleLogout = async () => {
-        try {
-            await logout()
-            navigate('/')
-        } catch (error) {
-            console.error('로그아웃 실패:', error)
-        }
-    }
+    const nickname = profile?.nickname || displayName
+    const avatarSrc = profile?.avatar_url || profileImage || 'https://i.pravatar.cc/150?img=12'
 
     return (
         <div className="min-h-full bg-background pb-24">
@@ -69,11 +99,23 @@ export const MyPage: React.FC = () => {
                     className="flex items-center gap-4"
                 >
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
-                        <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
+                        <img src={avatarSrc} alt={nickname} className="w-full h-full object-cover" />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl font-bold text-text mb-1 truncate">{displayName}</h1>
+                        <div className="flex items-center gap-2 mb-1">
+                            <h1 className="text-2xl font-bold text-text truncate">{nickname}</h1>
+
+                            <button
+                                type="button"
+                                onClick={() => navigate('/my/edit-profile')}
+                                className="shrink-0 inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-text hover:bg-gray-50 transition-colors"
+                            >
+                                <PencilIcon className="w-3.5 h-3.5" />
+                                수정
+                            </button>
+                        </div>
+
                         <p className="text-sm text-text-muted truncate">{email}</p>
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">

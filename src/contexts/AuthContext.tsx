@@ -42,6 +42,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         const initializeAuth = async () => {
             try {
+                setIsLoading(true)
+
                 const {
                     data: { session },
                     error,
@@ -55,6 +57,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 setUser(session?.user ?? null)
             } catch (error) {
                 console.error('초기 인증 상태 확인 중 오류:', error)
+                setSession(null)
+                setUser(null)
             } finally {
                 setIsLoading(false)
             }
@@ -64,7 +68,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('auth state change:', event, session)
+
             setSession(session)
             setUser(session?.user ?? null)
             setIsLoading(false)
@@ -86,6 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         })
 
         if (error) {
+            console.error('카카오 로그인 실패:', error)
             throw error
         }
     }
