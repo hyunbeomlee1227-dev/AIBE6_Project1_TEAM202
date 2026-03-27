@@ -14,6 +14,15 @@ type Profile = {
     created_at: string
     result_type: string | null
 }
+// 프로필 성향 타입 매핑
+const typeLabel: Record<string, string> = {
+    HEALING: '감성 힐링 여행가',
+    CALM: '고요 추구 여행가',
+    FOOD: '맛집 집착형 여행가',
+    PHOTO: '인스타 감성 수집가',
+    SHOPPING: '소비형 도시 탐험가',
+    EXPLORER: '개척자형 여행가',
+}
 
 type Bookmark = {
     id: string
@@ -123,6 +132,30 @@ export const MyPage: React.FC = () => {
         return null
     }
 
+    const handleDeleteAccount = async () => {
+        if (!user) return
+
+        const ok = window.confirm('정말 탈퇴하시겠어요?\n탈퇴하면 저장된 정보가 삭제됩니다.')
+        if (!ok) return
+
+        try {
+            const { error } = await supabase.from('users').delete().eq('id', user.id)
+
+            if (error) {
+                console.error('회원 탈퇴 실패:', error)
+                alert('회원 탈퇴에 실패했습니다.')
+                return
+            }
+
+            await logout()
+            alert('탈퇴가 완료되었습니다.')
+            navigate('/')
+        } catch (error) {
+            console.error('회원 탈퇴 중 오류:', error)
+            alert('회원 탈퇴 중 오류가 발생했습니다.')
+        }
+    }
+
     const email = user.email ?? '이메일 정보 없음'
     const nickname = profile?.nickname || displayName
     const avatarSrc = profile?.avatar_url || profileImage || 'https://i.pravatar.cc/150?img=12'
@@ -157,7 +190,10 @@ export const MyPage: React.FC = () => {
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">
                             <UserIcon className="w-4 h-4 text-text-muted" />
-                            <span className="text-sm font-bold text-text">여행 성향 준비 중</span>
+                            <span className="text-sm font-bold text-text">
+                                {' '}
+                                {profile?.result_type ? typeLabel[profile.result_type] : '테스트를 진행하세요!'}
+                            </span>
                         </div>
                     </div>
                 </motion.div>
@@ -177,10 +213,6 @@ export const MyPage: React.FC = () => {
                         }}
                     >
                         내 결과 보기
-                    </Button>
-
-                    <Button variant="secondary" fullWidth className="py-2.5 text-sm" onClick={handleLogout}>
-                        로그아웃
                     </Button>
                 </div>
             </div>
@@ -267,6 +299,15 @@ export const MyPage: React.FC = () => {
                 >
                     <LogOutIcon className="w-4 h-4" />
                     로그아웃
+                </button>
+            </div>
+            <div className="px-6 mt-3">
+                <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-gray-500 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+                >
+                    회원 탈퇴
                 </button>
             </div>
         </div>

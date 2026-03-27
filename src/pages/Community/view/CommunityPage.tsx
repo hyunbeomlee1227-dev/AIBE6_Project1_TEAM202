@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LoginPromptModal } from '../../../components/shared/LoginPromptModal'
 import { useAuth } from '../../../contexts/AuthContext'
-import { getPosts, Post } from '../../../services/testPostApi'
+import { getPosts, Post, toggleLike } from '../../../services/testPostApi'
 import { FilterBar } from '../components/filterBar'
+import { LoginModal } from '../components/LoginModal'
 import { PostFeed } from '../components/postFeed'
 import { WriteButton } from '../components/writeButton'
 import { useCommunityFilter } from '../hooks/useCommunityFilter'
@@ -16,6 +16,7 @@ export const CommunityPage: React.FC = () => {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [allPosts, setAllPosts] = useState<Post[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [likedPostIds, setLikedPostIds] = useState<string[]>([])
     const [bookmarkedPostIds, setBookmarkedPostIds] = useState<string[]>([])
 
     useEffect(() => {
@@ -54,16 +55,37 @@ export const CommunityPage: React.FC = () => {
         fetchBookmarks()
     }, [user])
 
+    useEffect(() => {
+        const fetchLikes = async () => {
+            if (!user) {
+                setLikedPostIds([])
+                return
+            }
+            const { data, error } = await supabase.from('post_likes').select('post_id').eq('user_id', user.id)
+            if (error) {
+                console.error('좋아요 목록 조회 실패:', error)
+                return
+            }
+            const ids = (data ?? []).map((item) => item.post_id).filter((id): id is string => Boolean(id))
+            setLikedPostIds(ids)
+        }
+        fetchLikes()
+    }, [user])
+
     const filteredPosts =
         activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.travel_type === activeFilter)
 
-    const handleLikeClick = (postId: string) => {
-        if (!isAuthenticated) {
+    const handleLikeClick = async (postId: string) => {
+        if (!isAuthenticated || !user?.id) {
             setIsLoginModalOpen(true)
             return
         }
-        setAllPosts((prevPosts) =>
-            prevPosts.map((post) => (post.id === postId ? { ...post, like_count: post.like_count + 1 } : post)),
+        const isLiked = await toggleLike(postId, user.id)
+        setLikedPostIds((prev) => (isLiked ? [...prev, postId] : prev.filter((id) => id !== postId)))
+        setAllPosts((prev) =>
+            prev.map((post) =>
+                post.id === postId ? { ...post, like_count: post.like_count + (isLiked ? 1 : -1) } : post,
+            ),
         )
     }
 
@@ -120,6 +142,14 @@ export const CommunityPage: React.FC = () => {
         }
     }
 
+    const handlePostClick = (postId: string) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true)
+            return
+        }
+        navigate(`/community/${postId}`)
+    }
+
     if (isLoading) {
         return (
             <div className="min-h-full bg-background flex items-center justify-center">
@@ -139,16 +169,25 @@ export const CommunityPage: React.FC = () => {
 
             <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-            <PostFeed posts={filteredPosts} onLikeClick={handleLikeClick} onBookmarkClick={handleBookmarkClick} />
+            <PostFeed
+                posts={filteredPosts}
+                likedPostIds={likedPostIds}
+                bookmarkedPostIds={bookmarkedPostIds}
+                onLikeClick={handleLikeClick}
+                onBookmarkClick={handleBookmarkClick}
+                onPostClick={handlePostClick}
+            />
 
-            <WriteButton onClick={handleWriteClick} />
+            {isAuthenticated && <WriteButton onClick={handleWriteClick} />}
 
-            <LoginPromptModal
+            <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
                 onConfirm={() => {
                     setIsLoginModalOpen(false)
-                    navigate('/login')
+                    navigate('/login', {
+                        state: { from: '/community' },
+                    })
                 }}
             />
         </div>
