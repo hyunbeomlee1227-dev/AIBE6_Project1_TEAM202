@@ -15,20 +15,21 @@ type Profile = {
     result_type: string | null
 }
 
+type Bookmark = {
+    id: string
+    user_id: string
+    place_name: string
+    //post_id: string | null
+    created_at: string
+}
+
 export const MyPage: React.FC = () => {
     const navigate = useNavigate()
     const { user, logout, isAuthenticated, isLoading, displayName, profileImage } = useAuth()
 
     const [activeTab, setActiveTab] = useState<'bookmarks' | 'posts'>('bookmarks')
     const [profile, setProfile] = useState<Profile | null>(null)
-
-    const mockBookmarks = useMemo(
-        () => [
-            { id: 1, title: '제주도 협재 해변', subtitle: '맑은 바다와 여유로운 풍경' },
-            { id: 2, title: '강릉 안목해변', subtitle: '카페거리와 바다가 함께' },
-        ],
-        [],
-    )
+    const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
 
     const mockPosts = useMemo(
         () => [
@@ -64,6 +65,42 @@ export const MyPage: React.FC = () => {
 
         fetchProfile()
     }, [user])
+
+    useEffect(() => {
+        const fetchBookmarks = async () => {
+            if (!user) return
+
+            const { data, error } = await supabase
+                .from('bookmarks')
+                .select('id, user_id, place_name, created_at')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+
+            if (error) {
+                console.error('북마크 조회 실패:', error)
+                return
+            }
+
+            setBookmarks(data ?? [])
+        }
+
+        fetchBookmarks()
+    }, [user])
+
+    const handleDeleteBookmark = async (bookmarkId: string) => {
+        const ok = window.confirm('이 북마크를 삭제할까요?')
+        if (!ok) return
+
+        const { error } = await supabase.from('bookmarks').delete().eq('id', bookmarkId)
+
+        if (error) {
+            console.error('북마크 삭제 실패:', error)
+            alert('북마크 삭제에 실패했습니다.')
+            return
+        }
+
+        setBookmarks((prev) => prev.filter((item) => item.id !== bookmarkId))
+    }
 
     const handleLogout = async () => {
         try {
@@ -172,17 +209,34 @@ export const MyPage: React.FC = () => {
             </div>
 
             <div className="px-6 space-y-3">
+                {activeTab === 'bookmarks' && bookmarks.length === 0 && (
+                    <Card className="p-4">
+                        <p className="text-sm text-text-muted text-center">저장한 장소가 없습니다.</p>
+                    </Card>
+                )}
+
                 {activeTab === 'bookmarks' &&
-                    mockBookmarks.map((item) => (
+                    bookmarks.map((item) => (
                         <Card key={item.id} className="p-4">
                             <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
                                     <BookmarkIcon className="w-5 h-5 text-text-muted" />
                                 </div>
-                                <div className="min-w-0">
-                                    <h3 className="font-bold text-text">{item.title}</h3>
-                                    <p className="text-sm text-text-muted mt-1">{item.subtitle}</p>
+
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-bold text-text">{item.place_name}</h3>
+                                    <p className="text-sm text-text-muted mt-1">
+                                        저장일: {new Date(item.created_at).toLocaleDateString('ko-KR')}
+                                    </p>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleDeleteBookmark(item.id)}
+                                    className="text-sm text-red-500 hover:text-red-600 shrink-0"
+                                >
+                                    삭제
+                                </button>
                             </div>
                         </Card>
                     ))}

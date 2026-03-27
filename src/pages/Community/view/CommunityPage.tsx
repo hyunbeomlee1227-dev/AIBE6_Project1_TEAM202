@@ -7,6 +7,7 @@ import { FilterBar } from '../components/filterBar'
 import { PostFeed } from '../components/postFeed'
 import { WriteButton } from '../components/writeButton'
 import { useCommunityFilter } from '../hooks/useCommunityFilter'
+import { supabase } from '../../../lib/supabase'
 
 export const CommunityPage: React.FC = () => {
     const navigate = useNavigate()
@@ -15,6 +16,7 @@ export const CommunityPage: React.FC = () => {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [allPosts, setAllPosts] = useState<Post[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [bookmarkedPostIds, setBookmarkedPostIds] = useState<string[]>([])
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -30,6 +32,28 @@ export const CommunityPage: React.FC = () => {
         fetchPosts()
     }, [])
 
+    useEffect(() => {
+        const fetchBookmarks = async () => {
+            if (!user) {
+                setBookmarkedPostIds([])
+                return
+            }
+
+            const { data, error } = await supabase.from('bookmarks').select('post_id').eq('user_id', user.id)
+
+            if (error) {
+                console.error('북마크 목록 조회 실패:', error)
+                return
+            }
+
+            const ids = (data ?? []).map((item) => item.post_id).filter((id): id is string => Boolean(id))
+
+            setBookmarkedPostIds(ids)
+        }
+
+        fetchBookmarks()
+    }, [user])
+
     const filteredPosts =
         activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.travel_type === activeFilter)
 
@@ -43,13 +67,49 @@ export const CommunityPage: React.FC = () => {
         )
     }
 
-    const handleBookmarkClick = (postId: string) => {
+    const handleBookmarkClick = async (postId: string) => {
         if (!isAuthenticated) {
             setIsLoginModalOpen(true)
             return
         }
-        // 북마크는 별도 테이블 연동 전까지 로컬 state만 유지
-        console.log('bookmark clicked:', postId)
+
+        if (!user) return
+
+        const targetPost = allPosts.find((post) => post.id === postId)
+        if (!targetPost) return
+
+        const isBookmarked = bookmarkedPostIds.includes(postId)
+
+        try {
+            if (isBookmarked) {
+                const { error } = await supabase.from('bookmarks').delete().eq('user_id', user.id).eq('post_id', postId)
+
+                if (error) {
+                    console.error('북마크 삭제 실패:', error)
+                    alert('북마크 삭제 실패')
+                    return
+                }
+
+                setBookmarkedPostIds((prev) => prev.filter((id) => id !== postId))
+                return
+            }
+
+            const { error } = await supabase.from('bookmarks').insert({
+                user_id: user.id,
+                post_id: postId,
+                place_name: targetPost.title,
+            })
+
+            if (error) {
+                console.error('북마크 저장 실패:', error)
+                alert('북마크 저장 실패')
+                return
+            }
+
+            setBookmarkedPostIds((prev) => [...prev, postId])
+        } catch (error) {
+            console.error('북마크 처리 실패:', error)
+        }
     }
 
     const handleWriteClick = () => {
