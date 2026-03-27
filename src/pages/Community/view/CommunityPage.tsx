@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoginPromptModal } from '../../../components/shared/LoginPromptModal'
 import { useAuth } from '../../../contexts/AuthContext'
-import { posts } from '../../../data/mockData'
+import { getPosts, Post } from '../../../services/testPostApi'
 import { FilterBar } from '../components/filterBar'
 import { PostFeed } from '../components/postFeed'
 import { WriteButton } from '../components/writeButton'
@@ -10,12 +10,28 @@ import { useCommunityFilter } from '../hooks/useCommunityFilter'
 
 export const CommunityPage: React.FC = () => {
     const navigate = useNavigate()
-    const { isAuthenticated } = useAuth()
+    const { isAuthenticated, user } = useAuth()
     const { activeFilter, setActiveFilter } = useCommunityFilter()
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-    const [allPosts, setAllPosts] = useState(posts)
+    const [allPosts, setAllPosts] = useState<Post[]>([])
+    const [isLoading, setIsLoading] = useState(true)
 
-    const filteredPosts = activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.type === activeFilter)
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const posts = await getPosts()
+                setAllPosts(posts)
+            } catch (error) {
+                console.error('불러오기 실패:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchPosts()
+    }, [])
+
+    const filteredPosts =
+        activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.travel_type === activeFilter)
 
     const handleLikeClick = (postId: string) => {
         if (!isAuthenticated) {
@@ -23,15 +39,7 @@ export const CommunityPage: React.FC = () => {
             return
         }
         setAllPosts((prevPosts) =>
-            prevPosts.map((post) =>
-                post.id === postId
-                    ? {
-                          ...post,
-                          isLiked: !post.isLiked,
-                          likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
-                      }
-                    : post,
-            ),
+            prevPosts.map((post) => (post.id === postId ? { ...post, like_count: post.like_count + 1 } : post)),
         )
     }
 
@@ -40,9 +48,8 @@ export const CommunityPage: React.FC = () => {
             setIsLoginModalOpen(true)
             return
         }
-        setAllPosts((prevPosts) =>
-            prevPosts.map((post) => (post.id === postId ? { ...post, isBookmarked: !post.isBookmarked } : post)),
-        )
+        // 북마크는 별도 테이블 연동 전까지 로컬 state만 유지
+        console.log('bookmark clicked:', postId)
     }
 
     const handleWriteClick = () => {
@@ -51,6 +58,14 @@ export const CommunityPage: React.FC = () => {
         } else {
             setIsLoginModalOpen(true)
         }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="min-h-full bg-background flex items-center justify-center">
+                <p className="text-text-muted">불러오는 중...</p>
+            </div>
+        )
     }
 
     return (
