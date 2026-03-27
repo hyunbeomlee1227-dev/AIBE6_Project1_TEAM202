@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeftIcon, LockIcon, MailIcon } from 'lucide-react'
-import { useAuth } from '../../../contexts/AuthContext'
+import React, { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { useAuth } from '../../../contexts/AuthContext'
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate()
+    const location = useLocation()
+    const from = location.state?.from ?? '/'
     const { loginWithKakao, isAuthenticated, isLoading } = useAuth()
 
     /**
@@ -52,14 +54,14 @@ export const LoginPage: React.FC = () => {
             setErrorMessage('카카오 로그인에 실패했습니다. 다시 시도해주세요.')
         }
     }
-
+    console.log('from:', location.state?.from)
     return (
         <div className="min-h-full bg-background flex flex-col">
             {/* 상단 뒤로가기 */}
             <div className="p-4 flex items-center">
                 <button
                     type="button"
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate(from)}
                     className="p-2 -ml-2 text-text-muted hover:text-text transition-colors"
                 >
                     <ChevronLeftIcon className="w-6 h-6" />

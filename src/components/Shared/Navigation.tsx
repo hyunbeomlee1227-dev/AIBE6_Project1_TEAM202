@@ -32,6 +32,17 @@ export const BottomNav: React.FC = () => {
         },
     ]
 
+    const handleNavigate = (path: string) => {
+        if (path === '/my' && !isAuthenticated) {
+            navigate('/login', {
+                state: { from: location.pathname + location.search },
+            })
+            return
+        }
+
+        navigate(path)
+    }
+
     return (
         <div className="absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 pb-safe flex justify-around items-center z-50">
             {navItems.map((item) => {
@@ -42,7 +53,7 @@ export const BottomNav: React.FC = () => {
                     return (
                         <button
                             key={item.path}
-                            onClick={() => navigate(item.path)}
+                            onClick={() => handleNavigate(item.path)}
                             className="flex flex-col items-center p-2 transition-colors"
                         >
                             <div
@@ -59,7 +70,7 @@ export const BottomNav: React.FC = () => {
                 return (
                     <button
                         key={item.path}
-                        onClick={() => navigate(item.path)}
+                        onClick={() => handleNavigate(item.path)}
                         className={`flex flex-col items-center p-2 transition-colors ${isActive ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <item.icon className={`w-6 h-6 mb-1 ${isActive ? 'fill-primary/20' : ''}`} />
