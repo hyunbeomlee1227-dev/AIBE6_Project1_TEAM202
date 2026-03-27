@@ -1,18 +1,6 @@
 export type TravelType = 'HEALING' | 'SHOPPING' | 'FOOD' | 'PHOTO' | 'CALM' | 'EXPLORER'
 
-export type ScoreMap = Partial<Record<TravelType, number>>
-
-export type AnswerOption = {
-    text: string
-    score: ScoreMap
-}
-
-export interface Question {
-    id: number
-    question: string
-    imageUrl: string
-    options: AnswerOption[]
-}
+export type { ScoreMap, AnswerOption, Question } from './models/testTypes'
 
 export interface Place {
     id: string
@@ -25,14 +13,7 @@ export interface Place {
     gallery: string[]
 }
 
-export interface ResultType {
-    id: TravelType
-    title: string
-    subtitle: string
-    description: string
-    emoji: string
-    color: string
-}
+export type { ResultType } from './models/testTypes'
 
 export interface User {
     id: string

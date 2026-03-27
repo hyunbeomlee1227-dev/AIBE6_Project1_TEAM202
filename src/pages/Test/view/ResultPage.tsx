@@ -2,8 +2,9 @@
 import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { LoadingSpinner } from '../../../components/shared/LoadingSpinner'
 import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
@@ -24,50 +25,44 @@ export const ResultPage: React.FC = () => {
         else return console.log('AI 응답 실패')
     }
 
+    const [isLoading, setIsLoading] = useState(true)
     const { type } = useParams<{
         type: string
     }>()
     const navigate = useNavigate()
-    // 2. 추출한 type 글자를 이용해 전체 결과 데이터(resultTypes)에서 상세 정보 객체를 찾아옴
     const result = resultTypes[type as TravelType]
-    // 3. [방어 로직] 만약 사용자가 주소창에 잘못된 값을 쳐서 결과 데이터가 없다면?
     useEffect(() => {
+        requestGemini(result.title).then((answer) => {
+            console.log(answer)
+            setIsLoading(false)
+        })
         if (!result) {
             navigate('/')
         }
     }, [result, navigate])
 
+    if (isLoading) return <LoadingSpinner />
     if (!result) return null
-
-    const answer = requestGemini(result.title)
-
-    console.log(answer)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
-    //결과 공유 함수
     const handleShare = async () => {
         const shareData = {
             title: '나의 여행 성향 테스트 결과',
             text: `나의 여행 성향은 [${result.title}]! 당신의 성향도 확인해보세요.`,
-            url: window.location.href, // 현재 결과 페이지의 주소
+            url: window.location.href,
         }
         try {
-            // 1. 브라우저가 기본 공유 기능을 지원하는지 확인 (모바일 위주)
             if (navigator.share) {
                 await navigator.share(shareData)
                 console.log('공유 성공!')
-            }
-            // 2. 지원하지 않는다면 링크 복사로 넘어감 (PC/일부 브라우저)
-            else {
+            } else {
                 await navigator.clipboard.writeText(window.location.href)
                 alert('링크가 클립보드에 복사되었습니다!')
             }
         } catch (error) {
-            // 사용자가 공유창을 그냥 닫았을 때(AbortError)는 아무것도 안 해도 됩니다.
             if ((error as Error).name !== 'AbortError') {
                 console.error('공유 실패:', error)
-                // 최후의 수단으로 복사라도 시도
                 await navigator.clipboard.writeText(window.location.href)
                 alert('링크를 복사했습니다.')
             }
