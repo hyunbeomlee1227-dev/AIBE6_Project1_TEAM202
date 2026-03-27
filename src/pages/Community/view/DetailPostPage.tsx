@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Comment, getComments, getPostById, Post, saveComment } from '../../../services/testPostApi'
+import { supabase } from '../../../lib/supabase'
+import {
+    Comment,
+    getComments,
+    getPostById,
+    Post,
+    saveComment,
+    toggleBookmark,
+    toggleLike,
+} from '../../../services/testPostApi'
 import { CommentInput } from '../components/commentInput'
 import { CommentList } from '../components/commentList'
 import { PostContent } from '../components/postContent'
@@ -15,6 +24,7 @@ interface LocalComment {
         avatar: string
     }
 }
+
 export const DetailPostPage: React.FC = () => {
     const { postId } = useParams<{ postId: string }>()
     const { user, displayName, profileImage } = useAuth()
@@ -22,6 +32,8 @@ export const DetailPostPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [comment, setComment] = useState('')
     const [localComments, setLocalComments] = useState<LocalComment[]>([])
+    const [isLiked, setIsLiked] = useState(false)
+    const [isBookmarked, setIsBookmarked] = useState(false)
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -46,12 +58,30 @@ export const DetailPostPage: React.FC = () => {
                 id: c.id,
                 content: c.content,
                 createdAt: c.created_at,
-                author: { nickname: '작성자', avatar: '' },
+                author: {
+                    nickname: c.nickname || '익명',
+                    avatar: c.avatar_url || '',
+                },
             }))
             setLocalComments(converted)
         }
         fetchComments()
     }, [postId])
+
+    useEffect(() => {
+        const fetchUserActions = async () => {
+            if (!user?.id || !postId) return
+
+            const [likeResult, bookmarkResult] = await Promise.all([
+                supabase.from('post_likes').select('id').eq('post_id', postId).eq('user_id', user.id).maybeSingle(),
+                supabase.from('bookmarks').select('id').eq('post_id', postId).eq('user_id', user.id).maybeSingle(),
+            ])
+
+            setIsLiked(!!likeResult.data)
+            setIsBookmarked(!!bookmarkResult.data)
+        }
+        fetchUserActions()
+    }, [user?.id, postId])
 
     if (isLoading) {
         return (
@@ -78,34 +108,62 @@ export const DetailPostPage: React.FC = () => {
         )
     }
 
+    const handleLikeClick = async () => {
+        if (!user?.id || !postId) return
+        try {
+            const liked = await toggleLike(postId, user.id)
+            setIsLiked(liked)
+
+            setPost((prev) => (prev ? { ...prev, like_count: prev.like_count + (liked ? 1 : -1) } : prev))
+        } catch (error) {
+            console.error('좋아요 실패:', error)
+        }
+    }
+
+    const handleBookmarkClick = async () => {
+        if (!user?.id || !postId) return
+        try {
+            const bookmarked = await toggleBookmark(postId, user.id)
+            setIsBookmarked(bookmarked)
+        } catch (error) {
+            console.error('북마크 실패:', error)
+        }
+    }
+
     const handleCommentSubmit = async () => {
         if (!comment.trim() || !user?.id || !postId) return
         try {
-            const newComment = await saveComment(postId, user.id, comment)
-            if (newComment) {
-                setLocalComments((prev) => [
-                    ...prev,
-                    {
-                        id: newComment.id,
-                        content: newComment.content,
-                        createdAt: newComment.created_at,
-                        author: {
-                            nickname: displayName || '나',
-                            avatar: profileImage || '',
-                        },
-                    },
-                ])
-            }
+            await saveComment(postId, user.id, comment)
             setComment('')
+
+            const data = await getComments(postId)
+            const converted: LocalComment[] = data.map((c: Comment) => ({
+                id: c.id,
+                content: c.content,
+                createdAt: c.created_at,
+                author: {
+                    nickname: c.nickname || '익명',
+                    avatar: c.avatar_url || '',
+                },
+            }))
+            setLocalComments(converted)
+
+            // comment_count 로컬 업데이트 추가
+            setPost((prev) => (prev ? { ...prev, comment_count: prev.comment_count + 1 } : prev))
         } catch (error) {
             console.error('댓글 저장 실패:', error)
         }
     }
-
     return (
         <div>
             <div className="p-6">
-                <PostContent post={post} />
+                <PostContent
+                    post={post}
+                    isLiked={isLiked}
+                    isBookmarked={isBookmarked}
+                    onLikeClick={handleLikeClick}
+                    onBookmarkClick={handleBookmarkClick}
+                />
                 <CommentList comments={localComments} commentCount={localComments.length} />
             </div>
             <CommentInput comment={comment} onCommentChange={setComment} onSubmit={handleCommentSubmit} />
