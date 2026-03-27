@@ -4,11 +4,11 @@ import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../../../components/shared/LoadingSpinner'
-import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
 import { requestGemini } from '../../../data/test/api'
+import KakaoMap from './Map'
 
 export const ResultPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true)
@@ -140,17 +140,13 @@ export const ResultPage: React.FC = () => {
                             type="text/javascript"
                             src="//dapi.kakao.com/v2/maps/sdk.js?appkey={내가 받은 key}&libraries=services"
                         ></script>
+
                         {recommendedPlaces.map((place) => (
-                            <PlaceCard key={place.id} place={place} />
+                            <KakaoMap key={place.id} />
+                            //<PlaceCard key={place.id} place={place} />
                         ))}
                     </div>
                 </motion.div>
-                <script
-                    type="text/javascript"
-                    src="//dapi.kakao.com/v2/maps/sdk.js?appkey=<%= import.meta.env.VITE_KAKAO_API_KEY %>
-                &libraries=services"
-                ></script>
-
                 <div className="pt-4 pb-8 flex justify-center">
                     <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                         <HomeIcon className="w-4 h-4" />
