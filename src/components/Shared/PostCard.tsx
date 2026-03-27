@@ -5,10 +5,12 @@ import { Post } from '../../services/testPostApi'
 import { Card } from '../ui/Card'
 interface PostCardProps {
     post: Post
+    isLiked?: boolean
+    isBookmarked?: boolean
     onLikeClick?: (e: React.MouseEvent) => void
     onBookmarkClick?: (e: React.MouseEvent) => void
 }
-export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmarkClick }) => {
+export const PostCard: React.FC<PostCardProps> = ({ post, isLiked, isBookmarked, onLikeClick, onBookmarkClick }) => {
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
     return (
         <Card hoverable className="overflow-hidden bg-white border border-gray-50">
@@ -34,11 +36,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmar
 
             <div className="px-4 pt-4 pb-2 flex justify-between items-center">
                 <div className="flex gap-4">
+                    {/* isLiked 적용 */}
                     <button
                         onClick={onLikeClick}
-                        className="flex items-center gap-1.5 text-text hover:text-primary transition-colors"
+                        className={`flex items-center gap-1.5 transition-colors ${isLiked ? 'text-primary' : 'text-text hover:text-primary'}`}
                     >
-                        <HeartIcon className="w-6 h-6" />
+                        <HeartIcon className={`w-6 h-6 ${isLiked ? 'fill-primary' : ''}`} />
                         <span className="text-sm font-medium">{post.like_count}</span>
                     </button>
                     <button className="flex items-center gap-1.5 text-text hover:text-primary transition-colors">
@@ -46,8 +49,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLikeClick, onBookmar
                         <span className="text-sm font-medium">{post.comment_count}</span>
                     </button>
                 </div>
-                <button onClick={onBookmarkClick} className="transition-colors text-text hover:text-primary">
-                    <BookmarkIcon className="w-6 h-6" />
+                {/* isBookmarked 적용 */}
+                <button
+                    onClick={onBookmarkClick}
+                    className={`transition-colors ${isBookmarked ? 'text-primary' : 'text-text hover:text-primary'}`}
+                >
+                    <BookmarkIcon className={`w-6 h-6 ${isBookmarked ? 'fill-primary' : ''}`} />
                 </button>
             </div>
 

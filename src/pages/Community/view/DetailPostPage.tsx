@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getPostById, Post } from '../../../services/testPostApi'
+import { useAuth } from '../../../contexts/AuthContext'
+import { Comment, getComments, getPostById, Post, saveComment } from '../../../services/testPostApi'
 import { CommentInput } from '../components/commentInput'
 import { CommentList } from '../components/commentList'
 import { PostContent } from '../components/postContent'
 
-interface Comment {
+interface LocalComment {
     id: string
     content: string
     createdAt: string
@@ -14,13 +15,13 @@ interface Comment {
         avatar: string
     }
 }
-
 export const DetailPostPage: React.FC = () => {
     const { postId } = useParams<{ postId: string }>()
+    const { user, displayName, profileImage } = useAuth()
     const [post, setPost] = useState<Post | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [comment, setComment] = useState('')
-    const [localComments, setLocalComments] = useState<Comment[]>([])
+    const [localComments, setLocalComments] = useState<LocalComment[]>([])
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -35,6 +36,21 @@ export const DetailPostPage: React.FC = () => {
             }
         }
         fetchPost()
+    }, [postId])
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            if (!postId) return
+            const data = await getComments(postId)
+            const converted: LocalComment[] = data.map((c: Comment) => ({
+                id: c.id,
+                content: c.content,
+                createdAt: c.created_at,
+                author: { nickname: '작성자', avatar: '' },
+            }))
+            setLocalComments(converted)
+        }
+        fetchComments()
     }, [postId])
 
     if (isLoading) {
@@ -62,19 +78,27 @@ export const DetailPostPage: React.FC = () => {
         )
     }
 
-    const handleCommentSubmit = () => {
-        if (comment.trim()) {
-            const newComment: Comment = {
-                id: Date.now().toString(),
-                content: comment,
-                createdAt: new Date().toISOString(),
-                author: {
-                    nickname: '나',
-                    avatar: '',
-                },
+    const handleCommentSubmit = async () => {
+        if (!comment.trim() || !user?.id || !postId) return
+        try {
+            const newComment = await saveComment(postId, user.id, comment)
+            if (newComment) {
+                setLocalComments((prev) => [
+                    ...prev,
+                    {
+                        id: newComment.id,
+                        content: newComment.content,
+                        createdAt: newComment.created_at,
+                        author: {
+                            nickname: displayName || '나',
+                            avatar: profileImage || '',
+                        },
+                    },
+                ])
             }
-            setLocalComments((prev) => [...prev, newComment])
             setComment('')
+        } catch (error) {
+            console.error('댓글 저장 실패:', error)
         }
     }
 
@@ -84,7 +108,6 @@ export const DetailPostPage: React.FC = () => {
                 <PostContent post={post} />
                 <CommentList comments={localComments} commentCount={localComments.length} />
             </div>
-
             <CommentInput comment={comment} onCommentChange={setComment} onSubmit={handleCommentSubmit} />
         </div>
     )
