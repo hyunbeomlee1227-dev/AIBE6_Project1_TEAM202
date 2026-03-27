@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LoginPromptModal } from '../../../components/shared/LoginPromptModal'
+
 import { useAuth } from '../../../contexts/AuthContext'
 import { getPosts, Post } from '../../../services/testPostApi'
 import { FilterBar } from '../components/filterBar'
+import { LoginModal } from '../components/LoginModal'
 import { PostFeed } from '../components/postFeed'
 import { WriteButton } from '../components/writeButton'
 import { useCommunityFilter } from '../hooks/useCommunityFilter'
@@ -60,6 +61,14 @@ export const CommunityPage: React.FC = () => {
         }
     }
 
+    const handlePostClick = (postId: string) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true)
+            return
+        }
+        navigate(`/community/${postId}`)
+    }
+
     if (isLoading) {
         return (
             <div className="min-h-full bg-background flex items-center justify-center">
@@ -79,16 +88,23 @@ export const CommunityPage: React.FC = () => {
 
             <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-            <PostFeed posts={filteredPosts} onLikeClick={handleLikeClick} onBookmarkClick={handleBookmarkClick} />
+            <PostFeed
+                posts={filteredPosts}
+                onLikeClick={handleLikeClick}
+                onBookmarkClick={handleBookmarkClick}
+                onPostClick={handlePostClick}
+            />
 
-            <WriteButton onClick={handleWriteClick} />
+            {isAuthenticated && <WriteButton onClick={handleWriteClick} />}
 
-            <LoginPromptModal
+            <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
                 onConfirm={() => {
                     setIsLoginModalOpen(false)
-                    navigate('/login')
+                    navigate('/login', {
+                        state: { from: '/community' },
+                    })
                 }}
             />
         </div>
