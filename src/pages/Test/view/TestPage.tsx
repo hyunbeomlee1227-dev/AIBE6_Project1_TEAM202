@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeftIcon } from 'lucide-react'
+import { ChevronLeftIcon, HomeIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
@@ -106,7 +106,9 @@ export const TestPage: React.FC = () => {
                 <div className="flex-1 px-4">
                     <ProgressBar current={currentIndex + 1} total={questions.length} />
                 </div>
-                <div className="w-10" /> {/* Spacer for balance */}
+                <button onClick={() => navigate('/')} className="p-2 -mr-2 text-text-muted hover:text-text transition-colors">
+                    <HomeIcon className="w-6 h-6" />
+                </button>
             </div>
 
             <div className="flex-1 relative flex flex-col justify-center">
@@ -134,7 +136,6 @@ export const TestPage: React.FC = () => {
                         <h2 className="text-2xl font-bold text-text mb-10 text-center break-keep leading-relaxed">
                             {currentQuestion.question}
                         </h2>
-
                         <div className="space-y-4">
                             {currentQuestion.options.map((option, idx) => (
                                 <Card
