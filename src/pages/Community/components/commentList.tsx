@@ -1,8 +1,17 @@
 import React from 'react'
-import { Comments } from '../../../data/mockData'
+
+interface Comment {
+    id: string
+    content: string
+    createdAt: string
+    author: {
+        nickname: string
+        avatar: string
+    }
+}
 
 interface CommentListProps {
-    comments: Comments[]
+    comments: Comment[]
     commentCount: number
 }
 

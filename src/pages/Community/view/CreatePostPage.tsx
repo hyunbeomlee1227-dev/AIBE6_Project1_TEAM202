@@ -5,17 +5,19 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { useAuth } from '../../../contexts/AuthContext'
 import { TravelType } from '../../../data/mockData'
+import { savePost, uploadPostImage } from '../../../services/testPostApi'
 import { ImageUploader } from '../components/imageUploader'
 import { PostForm } from '../components/postForm'
 import { TravelTypeSelector } from '../components/travelTypeSelector'
 
 export const CreatePostPage: React.FC = () => {
     const navigate = useNavigate()
-    const { isAuthenticated } = useAuth()
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [selectedType, setSelectedType] = useState<TravelType>('HEALING')
     const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [imageFile, setImageFile] = useState<File | null>(null)
+    const { isAuthenticated, user } = useAuth()
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -32,10 +34,19 @@ export const CreatePostPage: React.FC = () => {
         }
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (title && content) {
-            navigate('/community')
+            try {
+                let image_url = null
+                if (imageFile) {
+                    image_url = await uploadPostImage(imageFile)
+                }
+                await savePost({ title, content, image_url, travel_type: selectedType, user_id: user?.id })
+                navigate('/community')
+            } catch (error) {
+                console.error('저장 실패:', error)
+            }
         }
     }
 
