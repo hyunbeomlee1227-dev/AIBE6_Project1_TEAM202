@@ -14,6 +14,15 @@ type Profile = {
     created_at: string
     result_type: string | null
 }
+// 프로필 성향 타입 매핑
+const typeLabel: Record<string, string> = {
+    HEALING: '감성 힐링 여행가',
+    CALM: '고요 추구 여행가',
+    FOOD: '맛집 집착형 여행가',
+    PHOTO: '인스타 감성 수집가',
+    SHOPPING: '소비형 도시 탐험가',
+    EXPLORER: '개척자형 여행가',
+}
 
 export const MyPage: React.FC = () => {
     const navigate = useNavigate()
@@ -120,7 +129,10 @@ export const MyPage: React.FC = () => {
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">
                             <UserIcon className="w-4 h-4 text-text-muted" />
-                            <span className="text-sm font-bold text-text">여행 성향 준비 중</span>
+                            <span className="text-sm font-bold text-text">
+                                {' '}
+                                {profile?.result_type ? typeLabel[profile.result_type] : '테스트를 진행하세요!'}
+                            </span>
                         </div>
                     </div>
                 </motion.div>
