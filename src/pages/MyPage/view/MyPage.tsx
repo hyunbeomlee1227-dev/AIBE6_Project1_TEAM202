@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookmarkIcon, LogOutIcon, MapPinIcon, PencilIcon, UserIcon } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
-import { useAuth } from '../../../contexts/AuthContext'
 import { Card } from '../../../components/ui/Card'
+import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
-import { EditProfile } from './EditProfile'
 
 type Profile = {
     id: string
