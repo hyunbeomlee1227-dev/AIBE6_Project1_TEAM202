@@ -61,6 +61,7 @@ export const TestPage: React.FC = () => {
             } catch (error) {
                 console.error('테스트 결과 저장 실패', error)
             }
+            localStorage.setItem('testResult', resultType)
             navigate(`/result/${resultType}`, { replace: true })
         }
     }

@@ -125,7 +125,19 @@ export const MyPage: React.FC = () => {
                 </motion.div>
 
                 <div className="grid grid-cols-2 gap-3 mt-6">
-                    <Button variant="primary" fullWidth className="py-2.5 text-sm" onClick={() => navigate('/test')}>
+                    <Button
+                        variant="primary"
+                        fullWidth
+                        className="py-2.5 text-sm"
+                        onClick={() => {
+                            const savedResult = localStorage.getItem('testResult')
+                            if (savedResult) {
+                                navigate(`/result/${savedResult}`)
+                            } else {
+                                navigate('/test')
+                            }
+                        }}
+                    >
                         내 결과 보기
                     </Button>
 
