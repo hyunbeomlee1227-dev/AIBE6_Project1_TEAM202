@@ -5,9 +5,19 @@ import { Post } from '../../../services/testPostApi'
 
 interface PostContentProps {
     post: Post
+    isLiked: boolean
+    isBookmarked: boolean
+    onLikeClick: (e: React.MouseEvent) => void
+    onBookmarkClick: (e: React.MouseEvent) => void
 }
 
-export const PostContent: React.FC<PostContentProps> = ({ post }) => {
+export const PostContent: React.FC<PostContentProps> = ({
+    post,
+    isLiked,
+    isBookmarked,
+    onLikeClick,
+    onBookmarkClick,
+}) => {
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
 
     return (
@@ -42,15 +52,25 @@ export const PostContent: React.FC<PostContentProps> = ({ post }) => {
             <div className="flex items-center justify-between py-4 border-y border-gray-100">
                 <div className="flex gap-6">
                     <div className="flex items-center gap-1.5 text-text">
-                        <HeartIcon className="w-6 h-6" />
-                        <span className="font-medium">{post.like_count}</span>
+                        <button
+                            onClick={onLikeClick}
+                            className={`flex items-center gap-1.5 transition-colors ${isLiked ? 'text-primary' : 'text-text hover:text-primary'}`}
+                        >
+                            <HeartIcon className={`w-6 h-6 ${isLiked ? 'fill-primary' : ''}`} />
+                            <span className="font-medium">{post.like_count}</span>
+                        </button>
                     </div>
                     <div className="flex items-center gap-1.5 text-text">
                         <MessageCircleIcon className="w-6 h-6" />
                         <span className="font-medium">{post.comment_count}</span>
                     </div>
                 </div>
-                <BookmarkIcon className="w-6 h-6" />
+                <button
+                    onClick={onBookmarkClick}
+                    className={`transition-colors ${isBookmarked ? 'text-primary' : 'text-text hover:text-primary'}`}
+                >
+                    <BookmarkIcon className={`w-6 h-6 ${isBookmarked ? 'fill-primary' : ''}`} />
+                </button>
             </div>
         </div>
     )
