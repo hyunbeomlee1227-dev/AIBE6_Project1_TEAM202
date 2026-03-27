@@ -26,6 +26,8 @@ export interface Comment {
     user_id: string
     content: string
     created_at: string
+    nickname: string | null
+    avatar_url: string | null
 }
 
 export const getCurrentUserId = async (): Promise<string | null> => {
@@ -115,10 +117,12 @@ export const toggleBookmark = async (postId: string, userId: string): Promise<bo
         .maybeSingle()
 
     if (existing) {
-        await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
+        const { error } = await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
+        if (error) console.error('북마크 삭제 실패:', error)
         return false
     } else {
-        await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
+        const { error } = await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
+        if (error) console.error('북마크 저장 실패:', error)
         return true
     }
 }
@@ -132,7 +136,7 @@ export const getBookmarkedPostIds = async (userId: string): Promise<string[]> =>
 // 댓글
 export const getComments = async (postId: string): Promise<Comment[]> => {
     const { data, error } = await supabase
-        .from('comments')
+        .from('comments_with_author')
         .select('*')
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
@@ -149,7 +153,19 @@ export const saveComment = async (postId: string, userId: string, content: strin
 
     if (error) throw error
     await supabase.rpc('increment_comment_count', { post_id: postId })
-    return data
+
+    const { data: commentWithAuthor, error: fetchError } = await supabase
+        .from('comments_with_author')
+        .select('*')
+        .eq('id', data.id)
+        .single()
+
+    if (fetchError) {
+        console.error('saveComment fetch error:', fetchError)
+        return data // 실패 시 기본 데이터라도 반환
+    }
+
+    return commentWithAuthor
 }
 
 //좋아요
@@ -162,12 +178,16 @@ export const toggleLike = async (postId: string, userId: string): Promise<boolea
         .maybeSingle()
 
     if (existing) {
-        await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
-        await supabase.rpc('decrement_like_count', { post_id: postId })
+        const { error } = await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+        if (error) console.error('좋아요 삭제 실패:', error)
+        const { error: rpcError } = await supabase.rpc('decrement_like_count', { post_id: postId })
+        if (rpcError) console.error('decrement_like_count 실패:', rpcError)
         return false
     } else {
-        await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
-        await supabase.rpc('increment_like_count', { post_id: postId })
+        const { error } = await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+        if (error) console.error('좋아요 저장 실패:', error)
+        const { error: rpcError } = await supabase.rpc('increment_like_count', { post_id: postId })
+        if (rpcError) console.error('increment_like_count 실패:', rpcError)
         return true
     }
 }
