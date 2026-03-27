@@ -12,15 +12,26 @@ interface PostCardProps {
 }
 export const PostCard: React.FC<PostCardProps> = ({ post, isLiked, isBookmarked, onLikeClick, onBookmarkClick }) => {
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
+    const author = post.author
+    console.log('PostCard post:', post)
+    console.log('PostCard author:', post.author)
     return (
         <Card hoverable className="overflow-hidden bg-white border border-gray-50">
             <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg">
-                        {travelTypeInfo?.emoji ?? '✈️'}
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                        {author?.avatar_url ? (
+                            <img src={author.avatar_url} alt={author.nickname} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-lg">
+                                {travelTypeInfo?.emoji}
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <div className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-text-muted inline-flex items-center gap-1 mt-0.5">
+
+                    <div className="flex flex-col">
+                        <div className="font-bold text-text text-sm">{author?.nickname ?? '알 수 없는 사용자'}</div>
+                        <div className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-text-muted inline-flex items-center gap-1 mt-0.5 w-fit">
                             <span>{travelTypeInfo?.emoji}</span>
                             {travelTypeInfo?.title.split(' ')[0]}
                         </div>

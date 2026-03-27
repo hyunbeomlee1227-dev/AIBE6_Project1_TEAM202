@@ -7,6 +7,12 @@ export interface CreatePostInput {
     travel_type: string
     user_id?: string | null
 }
+export interface PostAuthor {
+    //posts 테이블의 user_id 와 users 테이블의 id가 외래키로 연결되어 있어 join
+    id: string
+    nickname: string
+    avatar_url: string | null
+}
 
 export interface Post {
     id: string
@@ -18,6 +24,7 @@ export interface Post {
     comment_count: number
     user_id: string | null
     created_at: string
+    author: PostAuthor | null
 }
 
 export interface Comment {
@@ -76,14 +83,41 @@ export const savePost = async (post: CreatePostInput) => {
 
 // posts 테이블 전체 조회 (저장 확인용)
 export const getPosts = async (): Promise<Post[]> => {
-    const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+        .from('posts')
+        .select(
+            `
+            id,
+            title,
+            content,
+            image_url,
+            travel_type,
+            like_count,
+            comment_count,
+            user_id,
+            created_at,
+            author:users (
+                id,
+                nickname,
+                avatar_url
+            )
+        `,
+        )
+        .order('created_at', { ascending: false })
+
     if (error) {
         console.error('getPosts error:', error)
         throw error
     }
-    return data ?? []
-}
 
+    const normalizedPosts: Post[] =
+        data?.map((post) => ({
+            ...post,
+            author: Array.isArray(post.author) ? (post.author[0] ?? null) : (post.author ?? null),
+        })) ?? []
+
+    return normalizedPosts
+}
 // 이미지를 Storage에 업로드하고 URL 반환
 export const uploadPostImage = async (file: File): Promise<string> => {
     const fileName = `${Date.now()}_${file.name}`
@@ -98,13 +132,38 @@ export const uploadPostImage = async (file: File): Promise<string> => {
 
 // 단건조회
 export const getPostById = async (postId: string): Promise<Post | null> => {
-    const { data, error } = await supabase.from('posts').select('*').eq('id', postId).single()
+    const { data, error } = await supabase
+        .from('posts')
+        .select(
+            `
+            id,
+            title,
+            content,
+            image_url,
+            travel_type,
+            like_count,
+            comment_count,
+            user_id,
+            created_at,
+            author:users (
+                id,
+                nickname,
+                avatar_url
+            )
+        `,
+        )
+        .eq('id', postId)
+        .single()
 
     if (error) {
         console.error('getPostById error:', error)
         return null
     }
-    return data
+
+    return {
+        ...data,
+        author: Array.isArray(data.author) ? (data.author[0] ?? null) : (data.author ?? null),
+    }
 }
 
 // 북마크
