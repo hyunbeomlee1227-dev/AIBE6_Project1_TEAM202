@@ -13,6 +13,9 @@ import createPlacecPrompt from '../../../data/prompt'
 
 export const ResultPage: React.FC = () => {
     async function requestGemini(request: string) {
+        return {
+            content: '이것은 테스트용 가짜 답변입니다. API 쿼리를 아끼고 있습니다! 😎',
+        }
         const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! })
         const prompt = createPlacecPrompt(request)
 

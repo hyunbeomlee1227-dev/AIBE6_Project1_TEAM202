@@ -61,6 +61,7 @@ export const TestPage: React.FC = () => {
             } catch (error) {
                 console.error('테스트 결과 저장 실패', error)
             }
+            localStorage.setItem('testResult', resultType)
             navigate(`/result/${resultType}`, { replace: true })
         }
     }
@@ -126,7 +127,7 @@ export const TestPage: React.FC = () => {
                             className="w-full h-full object-cover rounded-2xl mb-6"
                         />
                         {/* currentQuestion.text → currentQuestion.question 으로 변경 (새 Question 타입 구조) */}
-                        <h2 className="text-2xl font-bold text-text mb-10 text-center text-balance leading-relaxed">
+                        <h2 className="text-2xl font-bold text-text mb-10 text-center break-keep leading-relaxed">
                             {currentQuestion.question}
                         </h2>
 
