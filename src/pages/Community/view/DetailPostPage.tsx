@@ -9,6 +9,7 @@ export const DetailPostPage: React.FC = () => {
     const { postId } = useParams<{ postId: string }>()
     const post = posts.find((p) => p.id === postId)
     const [comment, setComment] = useState('')
+    const [localComments, setLocalComments] = useState<Comments[]>(post?.comments ?? [])
 
     if (!post) {
         return (
@@ -25,16 +26,26 @@ export const DetailPostPage: React.FC = () => {
 
     const handleCommentSubmit = () => {
         if (comment.trim()) {
-            // TODO: 댓글 제출 로직
+            const newComment: Comments = {
+                id: Date.now().toString(),
+                content: comment,
+                createdAt: new Date().toISOString(),
+                author: {
+                    nickname: '나',
+                    avatar: '',
+                },
+            }
+            setLocalComments((prev) => [...prev, newComment])
             setComment('')
         }
+        // supabase 연동시 insert 쿼리 추가 필요
     }
 
     return (
         <div>
             <div className="p-6">
                 <PostContent post={post} />
-                <CommentList comments={post.comments} commentCount={post.commentCount} />
+                <CommentList comments={localComments} commentCount={localComments.length} />
             </div>
 
             <CommentInput comment={comment} onCommentChange={setComment} onSubmit={handleCommentSubmit} />
