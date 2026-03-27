@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 
-export type TravelTypeId = 'healing' | 'shopping' | 'foodie' | 'photo' | 'calm' | 'explorer'
+export type TravelTypeId = 'HEALING' | 'SHOPPING' | 'FOOD' | 'PHOTO' | 'CALM' | 'EXPLORER'
 
 export interface TravelType {
     id: TravelTypeId
