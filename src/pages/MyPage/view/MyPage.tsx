@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BookmarkIcon, LogOutIcon, MapPinIcon, UserIcon } from 'lucide-react'
+import { BookmarkIcon, LogOutIcon, MapPinIcon, PencilIcon, UserIcon } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card } from '../../../components/ui/Card'
 import { supabase } from '../../../lib/supabase'
+import { EditProfile } from './EditProfile'
 
 type Profile = {
     id: string
@@ -58,12 +59,20 @@ export const MyPage: React.FC = () => {
                 return
             }
 
-            console.log('DB profile:', data)
             setProfile(data)
         }
 
         fetchProfile()
     }, [user])
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            navigate('/')
+        } catch (error) {
+            console.error('로그아웃 실패:', error)
+        }
+    }
 
     if (isLoading) {
         return (
@@ -81,15 +90,6 @@ export const MyPage: React.FC = () => {
     const nickname = profile?.nickname || displayName
     const avatarSrc = profile?.avatar_url || profileImage || 'https://i.pravatar.cc/150?img=12'
 
-    const handleLogout = async () => {
-        try {
-            await logout()
-            navigate('/')
-        } catch (error) {
-            console.error('로그아웃 실패:', error)
-        }
-    }
-
     return (
         <div className="min-h-full bg-background pb-24">
             <div className="px-6 pt-8 pb-6">
@@ -103,7 +103,19 @@ export const MyPage: React.FC = () => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl font-bold text-text mb-1 truncate">{nickname}</h1>
+                        <div className="flex items-center gap-2 mb-1">
+                            <h1 className="text-2xl font-bold text-text truncate">{nickname}</h1>
+
+                            <button
+                                type="button"
+                                onClick={() => navigate('/my/edit-profile')}
+                                className="shrink-0 inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-text hover:bg-gray-50 transition-colors"
+                            >
+                                <PencilIcon className="w-3.5 h-3.5" />
+                                수정
+                            </button>
+                        </div>
+
                         <p className="text-sm text-text-muted truncate">{email}</p>
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">
