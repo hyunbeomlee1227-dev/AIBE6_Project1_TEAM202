@@ -5,12 +5,21 @@ import { Post } from '../../../services/testPostApi'
 
 interface PostFeedProps {
     posts: Post[]
+    likedPostIds: string[]
+    bookmarkedPostIds: string[]
     onLikeClick: (postId: string) => void
     onBookmarkClick: (postId: string) => void
     onPostClick: (postId: string) => void
 }
 
-export const PostFeed: React.FC<PostFeedProps> = ({ posts, onLikeClick, onBookmarkClick, onPostClick }) => {
+export const PostFeed: React.FC<PostFeedProps> = ({
+    posts,
+    likedPostIds,
+    bookmarkedPostIds,
+    onLikeClick,
+    onBookmarkClick,
+    onPostClick,
+}) => {
     return (
         <div className="px-4 space-y-6">
             {posts.map((post, idx) => (
@@ -23,6 +32,8 @@ export const PostFeed: React.FC<PostFeedProps> = ({ posts, onLikeClick, onBookma
                 >
                     <PostCard
                         post={post}
+                        isLiked={likedPostIds.includes(post.id)}
+                        isBookmarked={bookmarkedPostIds.includes(post.id)}
                         onLikeClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()

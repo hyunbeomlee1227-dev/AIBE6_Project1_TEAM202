@@ -20,6 +20,14 @@ export interface Post {
     created_at: string
 }
 
+export interface Comment {
+    id: string
+    post_id: string
+    user_id: string
+    content: string
+    created_at: string
+}
+
 export const getCurrentUserId = async (): Promise<string | null> => {
     const {
         data: { session },
@@ -95,4 +103,77 @@ export const getPostById = async (postId: string): Promise<Post | null> => {
         return null
     }
     return data
+}
+
+// 북마크
+export const toggleBookmark = async (postId: string, userId: string): Promise<boolean> => {
+    const { data: existing } = await supabase
+        .from('bookmarks')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+    if (existing) {
+        await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
+        return false
+    } else {
+        await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
+        return true
+    }
+}
+
+export const getBookmarkedPostIds = async (userId: string): Promise<string[]> => {
+    const { data, error } = await supabase.from('bookmarks').select('post_id').eq('user_id', userId)
+    if (error) return []
+    return data.map((d) => d.post_id)
+}
+
+// 댓글
+export const getComments = async (postId: string): Promise<Comment[]> => {
+    const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true })
+    if (error) return []
+    return data ?? []
+}
+
+export const saveComment = async (postId: string, userId: string, content: string): Promise<Comment | null> => {
+    const { data, error } = await supabase
+        .from('comments')
+        .insert({ post_id: postId, user_id: userId, content })
+        .select()
+        .single()
+
+    if (error) throw error
+    await supabase.rpc('increment_comment_count', { post_id: postId })
+    return data
+}
+
+//좋아요
+export const toggleLike = async (postId: string, userId: string): Promise<boolean> => {
+    const { data: existing } = await supabase
+        .from('post_likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+    if (existing) {
+        await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+        await supabase.rpc('decrement_like_count', { post_id: postId })
+        return false
+    } else {
+        await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+        await supabase.rpc('increment_like_count', { post_id: postId })
+        return true
+    }
+}
+
+export const getLikedPostIds = async (userId: string): Promise<string[]> => {
+    const { data, error } = await supabase.from('post_likes').select('post_id').eq('user_id', userId)
+    if (error) return []
+    return data.map((d) => d.post_id)
 }
