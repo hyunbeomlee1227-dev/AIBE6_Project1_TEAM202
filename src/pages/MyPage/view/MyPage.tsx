@@ -12,6 +12,7 @@ type Profile = {
     nickname: string | null
     avatar_url: string | null
     created_at: string
+    result_type: string | null
 }
 
 export const MyPage: React.FC = () => {
@@ -49,7 +50,7 @@ export const MyPage: React.FC = () => {
 
             const { data, error } = await supabase
                 .from('users')
-                .select('id, nickname, avatar_url, created_at')
+                .select('id, nickname, avatar_url, created_at, result_type')
                 .eq('id', user.id)
                 .single()
 
@@ -130,7 +131,7 @@ export const MyPage: React.FC = () => {
                         fullWidth
                         className="py-2.5 text-sm"
                         onClick={() => {
-                            const savedResult = localStorage.getItem('testResult')
+                            const savedResult = profile?.result_type
                             if (savedResult) {
                                 navigate(`/result/${savedResult}`)
                             } else {

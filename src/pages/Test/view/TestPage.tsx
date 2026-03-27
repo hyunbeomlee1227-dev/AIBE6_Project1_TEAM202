@@ -6,6 +6,7 @@ import { Card } from '../../../components/ui/Card'
 import { useAuth } from '../../../contexts/AuthContext'
 import { questions } from '../../../data/mock/questions'
 import { AnswerOption, TravelType } from '../../../data/mockData'
+import { supabase } from '../../../lib/supabase'
 import { saveTestResult } from '../../../services/testCountApi'
 import { ProgressBar } from '../component/ProgressBar'
 
@@ -57,11 +58,14 @@ export const TestPage: React.FC = () => {
             try {
                 console.log('저장 직전 resultType:', resultType)
                 await saveTestResult(resultType, user?.id ?? null)
+                const { error } = await supabase.from('users').update({ result_type: resultType }).eq('id', user?.id)
+                if (error) {
+                    console.error('테스트 결과 저장 실패:', error)
+                }
                 console.log('저장 성공')
             } catch (error) {
                 console.error('테스트 결과 저장 실패', error)
             }
-            localStorage.setItem('testResult', resultType)
             navigate(`/result/${resultType}`, { replace: true })
         }
     }
