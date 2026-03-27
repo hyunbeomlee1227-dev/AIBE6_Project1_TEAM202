@@ -1,29 +1,27 @@
 import { BookmarkIcon, HeartIcon, MessageCircleIcon } from 'lucide-react'
 import React from 'react'
-import { Post, resultTypes } from '../../../data/mockData'
+import { resultTypes } from '../../../data/mockData'
+import { Post } from '../../../services/testPostApi'
 
 interface PostContentProps {
     post: Post
 }
 
 export const PostContent: React.FC<PostContentProps> = ({ post }) => {
-    const travelTypeInfo = resultTypes[post.type]
+    const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
 
     return (
         <div>
-            {/* 작성자 정보 */}
+            {/* 작성자 정보 - author 없으므로 travel_type으로 대체 */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <img
-                        src={post.author.avatar}
-                        alt={post.author.nickname}
-                        className="w-12 h-12 rounded-full object-cover"
-                    />
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-xl">
+                        {travelTypeInfo?.emoji ?? '✈️'}
+                    </div>
                     <div>
-                        <div className="font-bold text-text">{post.author.nickname}</div>
                         <div className="text-xs text-text-muted flex items-center gap-1">
-                            <span>{travelTypeInfo.emoji}</span>
-                            {travelTypeInfo.title}
+                            <span>{travelTypeInfo?.emoji}</span>
+                            {travelTypeInfo?.title}
                         </div>
                     </div>
                 </div>
@@ -34,9 +32,9 @@ export const PostContent: React.FC<PostContentProps> = ({ post }) => {
             <p className="text-text leading-relaxed mb-6 whitespace-pre-wrap">{post.content}</p>
 
             {/* 이미지 영역 */}
-            {post.image && (
+            {post.image_url && (
                 <div className="rounded-2xl overflow-hidden mb-6 bg-gray-100">
-                    <img src={post.image} alt="게시글 이미지" className="w-full h-auto object-cover" />
+                    <img src={post.image_url} alt="게시글 이미지" className="w-full h-auto object-cover" />
                 </div>
             )}
 
@@ -44,15 +42,15 @@ export const PostContent: React.FC<PostContentProps> = ({ post }) => {
             <div className="flex items-center justify-between py-4 border-y border-gray-100">
                 <div className="flex gap-6">
                     <div className="flex items-center gap-1.5 text-text">
-                        <HeartIcon className={`w-6 h-6 ${post.isLiked ? 'fill-primary text-primary' : ''}`} />
-                        <span className="font-medium">{post.likeCount}</span>
+                        <HeartIcon className="w-6 h-6" />
+                        <span className="font-medium">{post.like_count}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-text">
                         <MessageCircleIcon className="w-6 h-6" />
-                        <span className="font-medium">{post.commentCount}</span>
+                        <span className="font-medium">{post.comment_count}</span>
                     </div>
                 </div>
-                <BookmarkIcon className={`w-6 h-6 ${post.isBookmarked ? 'fill-primary text-primary' : ''}`} />
+                <BookmarkIcon className="w-6 h-6" />
             </div>
         </div>
     )
