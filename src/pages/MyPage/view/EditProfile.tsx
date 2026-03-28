@@ -1,10 +1,10 @@
+import { ArrowLeftIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeftIcon } from 'lucide-react'
-import { useAuth } from '../../../contexts/AuthContext'
-import { supabase } from '../../../lib/supabase'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { useAuth } from '../../../contexts/AuthContext'
+import { supabase } from '../../../lib/supabase'
 
 type Profile = {
     id: string
@@ -21,6 +21,8 @@ export const EditProfile: React.FC = () => {
     const [nicknameInput, setNicknameInput] = useState('')
     const [isSaving, setIsSaving] = useState(false)
     const [isFetching, setIsFetching] = useState(true)
+    const [imageFile, setImageFile] = useState<File | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -63,11 +65,30 @@ export const EditProfile: React.FC = () => {
             alert('닉네임을 입력해주세요.')
             return
         }
-
+        // 수정에 프로필 수정 추가
         try {
             setIsSaving(true)
+            let newAvatarUrl = profile?.avatar_url
+            if (imageFile) {
+                const fileExt = imageFile.name.split('.').pop()
+                const fileName = `${user.id}_${Date.now()}.${fileExt}`
+                const { error: uploadError } = await supabase.storage
+                    .from('profile')
+                    .upload(fileName, imageFile, { upsert: true })
+                if (uploadError) {
+                    console.error('프로필 이미지 업로드 실패:', uploadError)
+                    alert('프로필 이미지 업로드에 실패했습니다.')
+                    setIsSaving(false)
+                    return
+                }
+                const { data: publicUrlData } = supabase.storage.from('profile').getPublicUrl(fileName)
 
-            const { error } = await supabase.from('users').update({ nickname: trimmedNickname }).eq('id', user.id)
+                newAvatarUrl = publicUrlData.publicUrl
+            }
+            const { error } = await supabase
+                .from('users')
+                .update({ nickname: trimmedNickname, avatar_url: newAvatarUrl })
+                .eq('id', user.id)
 
             if (error) {
                 console.error('닉네임 저장 실패:', error)
@@ -75,7 +96,7 @@ export const EditProfile: React.FC = () => {
                 return
             }
 
-            alert('닉네임이 저장되었습니다.')
+            alert('닉네임과 프로필이 저장되었습니다.')
             navigate('/my')
         } catch (error) {
             console.error('닉네임 저장 중 오류:', error)
@@ -96,8 +117,16 @@ export const EditProfile: React.FC = () => {
     if (!user) {
         return null
     }
-
-    const avatarSrc = profile?.avatar_url || 'https://i.pravatar.cc/150?img=12'
+    // 프로필 업로드 시 미리보기
+    const avatarSrc = previewUrl || profile?.avatar_url || 'https://i.pravatar.cc/150?img=12'
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setImageFile(file)
+            const url = URL.createObjectURL(file)
+            setPreviewUrl(url)
+        }
+    }
 
     return (
         <div className="min-h-full bg-background pb-24">
@@ -115,12 +144,22 @@ export const EditProfile: React.FC = () => {
             <div className="px-6 pt-4">
                 <Card className="p-6">
                     <div className="flex flex-col items-center text-center">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+                        <div className="relative group cursor-pointer w-24 h-24 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
                             <img src={avatarSrc} alt="프로필 이미지" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <span className="text-white text-xs font-semibold">사진 변경</span>
+                            </div>
+                            <input
+                                type="file"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                accept="image/*"
+                                title="프로필 이미지 변경"
+                                onChange={handleFileChange}
+                            />
                         </div>
 
                         <h1 className="mt-4 text-2xl font-bold text-text">프로필 수정</h1>
-                        <p className="mt-1 text-sm text-text-muted">닉네임을 변경할 수 있어요.</p>
+                        <p className="mt-1 text-sm text-text-muted">닉네임과 사진을 변경할 수 있어요.</p>
                     </div>
 
                     <div className="mt-6">

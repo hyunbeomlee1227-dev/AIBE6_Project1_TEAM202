@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import React, { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
 interface AuthContextType {
@@ -58,6 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             },
             {
                 onConflict: 'id',
+                ignoreDuplicates: true,
             },
         )
 

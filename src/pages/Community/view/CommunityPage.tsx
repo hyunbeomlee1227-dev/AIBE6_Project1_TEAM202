@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
+import { supabase } from '../../../lib/supabase'
 import { getPosts, Post, toggleLike } from '../../../services/testPostApi'
 import { FilterBar } from '../components/filterBar'
 import { LoginModal } from '../components/LoginModal'
 import { PostFeed } from '../components/postFeed'
 import { WriteButton } from '../components/writeButton'
 import { useCommunityFilter } from '../hooks/useCommunityFilter'
-import { supabase } from '../../../lib/supabase'
 
 export const CommunityPage: React.FC = () => {
     const navigate = useNavigate()
@@ -23,6 +23,7 @@ export const CommunityPage: React.FC = () => {
         const fetchPosts = async () => {
             try {
                 const posts = await getPosts()
+                console.log('community page post', posts)
                 setAllPosts(posts)
             } catch (error) {
                 console.error('불러오기 실패:', error)

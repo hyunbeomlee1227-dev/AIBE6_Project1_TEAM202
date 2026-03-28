@@ -7,6 +7,12 @@ export interface CreatePostInput {
     travel_type: string
     user_id?: string | null
 }
+export interface PostAuthor {
+    //posts 테이블의 user_id 와 users 테이블의 id가 외래키로 연결되어 있어 join
+    id: string
+    nickname: string
+    avatar_url: string | null
+}
 
 export interface Post {
     id: string
@@ -18,6 +24,7 @@ export interface Post {
     comment_count: number
     user_id: string | null
     created_at: string
+    author: PostAuthor | null
 }
 
 export interface Comment {
@@ -26,6 +33,8 @@ export interface Comment {
     user_id: string
     content: string
     created_at: string
+    nickname: string | null
+    avatar_url: string | null
 }
 
 export const getCurrentUserId = async (): Promise<string | null> => {
@@ -74,14 +83,41 @@ export const savePost = async (post: CreatePostInput) => {
 
 // posts 테이블 전체 조회 (저장 확인용)
 export const getPosts = async (): Promise<Post[]> => {
-    const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+        .from('posts')
+        .select(
+            `
+            id,
+            title,
+            content,
+            image_url,
+            travel_type,
+            like_count,
+            comment_count,
+            user_id,
+            created_at,
+            author:users (
+                id,
+                nickname,
+                avatar_url
+            )
+        `,
+        )
+        .order('created_at', { ascending: false })
+
     if (error) {
         console.error('getPosts error:', error)
         throw error
     }
-    return data ?? []
-}
 
+    const normalizedPosts: Post[] =
+        data?.map((post) => ({
+            ...post,
+            author: Array.isArray(post.author) ? (post.author[0] ?? null) : (post.author ?? null),
+        })) ?? []
+
+    return normalizedPosts
+}
 // 이미지를 Storage에 업로드하고 URL 반환
 export const uploadPostImage = async (file: File): Promise<string> => {
     const fileName = `${Date.now()}_${file.name}`
@@ -96,13 +132,38 @@ export const uploadPostImage = async (file: File): Promise<string> => {
 
 // 단건조회
 export const getPostById = async (postId: string): Promise<Post | null> => {
-    const { data, error } = await supabase.from('posts').select('*').eq('id', postId).single()
+    const { data, error } = await supabase
+        .from('posts')
+        .select(
+            `
+            id,
+            title,
+            content,
+            image_url,
+            travel_type,
+            like_count,
+            comment_count,
+            user_id,
+            created_at,
+            author:users (
+                id,
+                nickname,
+                avatar_url
+            )
+        `,
+        )
+        .eq('id', postId)
+        .single()
 
     if (error) {
         console.error('getPostById error:', error)
         return null
     }
-    return data
+
+    return {
+        ...data,
+        author: Array.isArray(data.author) ? (data.author[0] ?? null) : (data.author ?? null),
+    }
 }
 
 // 북마크
@@ -115,10 +176,12 @@ export const toggleBookmark = async (postId: string, userId: string): Promise<bo
         .maybeSingle()
 
     if (existing) {
-        await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
+        const { error } = await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
+        if (error) console.error('북마크 삭제 실패:', error)
         return false
     } else {
-        await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
+        const { error } = await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
+        if (error) console.error('북마크 저장 실패:', error)
         return true
     }
 }
@@ -132,7 +195,7 @@ export const getBookmarkedPostIds = async (userId: string): Promise<string[]> =>
 // 댓글
 export const getComments = async (postId: string): Promise<Comment[]> => {
     const { data, error } = await supabase
-        .from('comments')
+        .from('comments_with_author')
         .select('*')
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
@@ -149,7 +212,19 @@ export const saveComment = async (postId: string, userId: string, content: strin
 
     if (error) throw error
     await supabase.rpc('increment_comment_count', { post_id: postId })
-    return data
+
+    const { data: commentWithAuthor, error: fetchError } = await supabase
+        .from('comments_with_author')
+        .select('*')
+        .eq('id', data.id)
+        .single()
+
+    if (fetchError) {
+        console.error('saveComment fetch error:', fetchError)
+        return data // 실패 시 기본 데이터라도 반환
+    }
+
+    return commentWithAuthor
 }
 
 //좋아요
@@ -162,12 +237,16 @@ export const toggleLike = async (postId: string, userId: string): Promise<boolea
         .maybeSingle()
 
     if (existing) {
-        await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
-        await supabase.rpc('decrement_like_count', { post_id: postId })
+        const { error } = await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+        if (error) console.error('좋아요 삭제 실패:', error)
+        const { error: rpcError } = await supabase.rpc('decrement_like_count', { post_id: postId })
+        if (rpcError) console.error('decrement_like_count 실패:', rpcError)
         return false
     } else {
-        await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
-        await supabase.rpc('increment_like_count', { post_id: postId })
+        const { error } = await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+        if (error) console.error('좋아요 저장 실패:', error)
+        const { error: rpcError } = await supabase.rpc('increment_like_count', { post_id: postId })
+        if (rpcError) console.error('increment_like_count 실패:', rpcError)
         return true
     }
 }
