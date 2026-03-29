@@ -39,7 +39,6 @@ export const PostContent: React.FC<PostContentProps> = ({
 
             {/* 게시글 내용 */}
             <h1 className="text-2xl font-bold text-text mb-4">{post.title}</h1>
-            <p className="text-text leading-relaxed mb-6 whitespace-pre-wrap">{post.content}</p>
 
             {/* 이미지 영역 */}
             {post.image_url && (
@@ -48,6 +47,7 @@ export const PostContent: React.FC<PostContentProps> = ({
                 </div>
             )}
 
+            <p className="text-text leading-relaxed mb-6 whitespace-pre-wrap">{post.content}</p>
             {/* 하단 인터랙션 바 */}
             <div className="flex items-center justify-between py-4 border-y border-gray-100">
                 <div className="flex gap-6">
