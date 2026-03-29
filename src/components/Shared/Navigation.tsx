@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 export const BottomNav: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
-    const { user, isAuthenticated } = useAuth()
+    const { user, isAuthenticated, profileImage } = useAuth()
     // Hide nav on specific pages
     const hiddenPaths = ['/test', '/login', '/signup', '/create-post']
     if (hiddenPaths.some((path) => location.pathname.startsWith(path))) return null
@@ -59,7 +59,14 @@ export const BottomNav: React.FC = () => {
                             <div
                                 className={`w-6 h-6 mb-1 rounded-full overflow-hidden border-2 transition-colors ${isActive ? 'border-primary' : 'border-transparent'}`}
                             >
-                                <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                <img
+                                    src={profileImage || 'https://i.pravatar.cc/100?img=12'}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.src = 'https://i.pravatar.cc/100?img=12'
+                                    }}
+                                />
                             </div>
                             <span className={`text-[10px] font-medium ${isActive ? 'text-primary' : 'text-gray-400'}`}>
                                 {item.label}
