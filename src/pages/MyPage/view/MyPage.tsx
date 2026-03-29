@@ -28,7 +28,7 @@ type Bookmark = {
     id: string
     user_id: string
     place_name: string
-    //post_id: string | null
+    post_id: string | null
     created_at: string
 }
 
@@ -39,6 +39,7 @@ export const MyPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'bookmarks' | 'posts'>('bookmarks')
     const [profile, setProfile] = useState<Profile | null>(null)
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
+    const [myPosts, setMyPosts] = useState<any[]>([])
 
     const mockPosts = useMemo(
         () => [
@@ -81,7 +82,7 @@ export const MyPage: React.FC = () => {
 
             const { data, error } = await supabase
                 .from('bookmarks')
-                .select('id, user_id, place_name, created_at')
+                .select('id, user_id, place_name, post_id, created_at')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
 
@@ -94,6 +95,27 @@ export const MyPage: React.FC = () => {
         }
 
         fetchBookmarks()
+    }, [user])
+
+    useEffect(() => {
+        const fetchMyPosts = async () => {
+            if (!user) return
+
+            const { data, error } = await supabase
+                .from('posts')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+
+            if (error) {
+                console.error('내 게시글 조회 실패:', error)
+                return
+            }
+
+            setMyPosts(data ?? [])
+        }
+
+        fetchMyPosts()
     }, [user])
 
     const handleDeleteBookmark = async (bookmarkId: string) => {
@@ -249,7 +271,11 @@ export const MyPage: React.FC = () => {
 
                 {activeTab === 'bookmarks' &&
                     bookmarks.map((item) => (
-                        <Card key={item.id} className="p-4">
+                        <Card
+                            key={item.id}
+                            className="p-4 cursor-pointer"
+                            onClick={() => navigate(`/community/${item.post_id}`)}
+                        >
                             <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
                                     <BookmarkIcon className="w-5 h-5 text-text-muted" />
@@ -264,7 +290,11 @@ export const MyPage: React.FC = () => {
 
                                 <button
                                     type="button"
-                                    onClick={() => handleDeleteBookmark(item.id)}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleDeleteBookmark(item.id)
+                                    }}
                                     className="text-sm text-red-500 hover:text-red-600 shrink-0"
                                 >
                                     삭제
@@ -273,17 +303,39 @@ export const MyPage: React.FC = () => {
                         </Card>
                     ))}
 
+                {activeTab === 'posts' && myPosts.length === 0 && (
+                    <Card className="p-4">
+                        <p className="text-sm text-text-muted text-center">작성한 게시글이 없습니다.</p>
+                    </Card>
+                )}
+
                 {activeTab === 'posts' &&
-                    mockPosts.map((item) => (
-                        <Card key={item.id} className="p-4">
+                    myPosts.map((item) => (
+                        <Card
+                            key={item.id}
+                            className="p-4 cursor-pointer"
+                            onClick={() => navigate(`/community/${item.id}`)}
+                        >
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                                    <MapPinIcon className="w-5 h-5 text-text-muted" />
-                                </div>
-                                <div className="min-w-0">
-                                    <h3 className="font-bold text-text">{item.title}</h3>
-                                    <p className="text-sm text-text-muted mt-1">
-                                        실제 게시글 데이터 연결 전 임시 영역입니다.
+                                {item.image_url ? (
+                                    <img
+                                        src={item.image_url}
+                                        alt={item.title}
+                                        className="w-16 h-16 rounded-xl object-cover shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                                        <MapPinIcon className="w-5 h-5 text-text-muted" />
+                                    </div>
+                                )}
+
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-bold text-text text-base truncate">{item.title}</h3>
+                                    <p className="text-sm text-text-muted mt-1 line-clamp-2">
+                                        {item.content || '내용이 없습니다.'}
+                                    </p>
+                                    <p className="text-xs text-text-muted mt-2">
+                                        {new Date(item.created_at).toLocaleDateString('ko-KR')}
                                     </p>
                                 </div>
                             </div>
