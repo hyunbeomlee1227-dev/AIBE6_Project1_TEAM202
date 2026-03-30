@@ -1,50 +1,45 @@
 'use client'
-import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PlaceCard } from '../../../components/PlaceCard'
 import { LoadingSpinner } from '../../../components/shared/LoadingSpinner'
-import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { places, resultTypes, TravelType } from '../../../data/mockData'
-import createPlacecPrompt from '../../../data/prompt'
+import { Place, resultTypes, TravelType } from '../../../data/mockData'
+import { requestGemini } from '../../../data/test/api'
 
 export const ResultPage: React.FC = () => {
-    async function requestGemini(request: string) {
-        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! })
-        const prompt = createPlacecPrompt(request)
-
-        const result = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        })
-
-        if (result !== undefined) return result.text
-        else return console.log('AI 응답 실패')
-    }
-
     const [isLoading, setIsLoading] = useState(true)
-    const { type } = useParams<{
-        type: string
-    }>()
+    const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>([])
+    const { type } = useParams()
     const navigate = useNavigate()
-    const result = resultTypes[type as TravelType]
+    const result = type ? resultTypes[type as TravelType] : undefined
+
     useEffect(() => {
-        requestGemini(result.title).then((answer) => {
-            console.log(answer)
-            setIsLoading(false)
-        })
         if (!result) {
             navigate('/')
         }
+
+        const fetchData = async () => {
+            try {
+                const res = await requestGemini(result!.title)
+                setRecommendedPlaces(res)
+            } catch (err) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error(err)
+                }
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchData()
     }, [result, navigate])
 
     if (isLoading) return <LoadingSpinner />
     if (!result) return null
-
-    const recommendedPlaces = places.filter((p) => p.type === result.id)
 
     const handleShare = async () => {
         const shareData = {
@@ -56,6 +51,7 @@ export const ResultPage: React.FC = () => {
             if (navigator.share) {
                 await navigator.share(shareData)
                 console.log('공유 성공!')
+                return
             } else {
                 await navigator.clipboard.writeText(window.location.href)
                 alert('링크가 클립보드에 복사되었습니다!')
@@ -149,13 +145,12 @@ export const ResultPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-text">이런 곳은 어때요?</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-5">
                         {recommendedPlaces.map((place) => (
-                            <PlaceCard key={place.id} place={place} />
+                            <PlaceCard key={`${place.name}-${place.location}`} place={place} />
                         ))}
                     </div>
                 </motion.div>
-
                 <div className="pt-4 pb-8 flex justify-center">
                     <Button variant="ghost" onClick={() => navigate('/')} className="gap-2">
                         <HomeIcon className="w-4 h-4" />

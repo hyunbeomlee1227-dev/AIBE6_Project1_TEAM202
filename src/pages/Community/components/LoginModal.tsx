@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { LockIcon, XIcon } from 'lucide-react'
 import React from 'react'
-import { Button } from './ui/Button'
-import { Card } from './ui/Card'
-interface LoginPromptModalProps {
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
+interface LoginModalProps {
     isOpen: boolean
     onClose: () => void
     onConfirm: () => void
 }
-export const LoginPromptModal: React.FC<LoginPromptModalProps> = ({ isOpen, onClose, onConfirm }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onConfirm }) => {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -26,7 +26,6 @@ export const LoginPromptModal: React.FC<LoginPromptModalProps> = ({ isOpen, onCl
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={onClose}
                     />
-
                     <motion.div
                         initial={{
                             opacity: 0,
@@ -57,15 +56,17 @@ export const LoginPromptModal: React.FC<LoginPromptModalProps> = ({ isOpen, onCl
                                 <LockIcon className="w-8 h-8" />
                             </div>
 
-                            <h3 className="text-xl font-bold text-text mb-2">로그인이 필요해요</h3>
-                            <p className="text-text-muted text-sm mb-6">이 기능을 사용하려면 먼저 로그인해주세요.</p>
+                            <h3 className="text-xl font-bold text-text mb-2">로그인 후 이용할 수 있어요</h3>
+                            <p className="text-text-muted text-sm mb-6">
+                                게시글 상세 확인과 글쓰기는 로그인 후 가능합니다.
+                            </p>
 
                             <div className="flex flex-col gap-2">
                                 <Button fullWidth onClick={onConfirm}>
-                                    로그인하기
+                                    로그인하러 가기
                                 </Button>
                                 <Button variant="ghost" fullWidth onClick={onClose}>
-                                    취소
+                                    닫기
                                 </Button>
                             </div>
                         </Card>

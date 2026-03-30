@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeftIcon } from 'lucide-react'
+import { ChevronLeftIcon, HomeIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
 import { useAuth } from '../../../contexts/AuthContext'
 import { questions } from '../../../data/mock/questions'
 import { AnswerOption, TravelType } from '../../../data/mockData'
+import { supabase } from '../../../lib/supabase'
 import { saveTestResult } from '../../../services/testCountApi'
 import { ProgressBar } from '../component/ProgressBar'
 
@@ -57,6 +58,10 @@ export const TestPage: React.FC = () => {
             try {
                 console.log('저장 직전 resultType:', resultType)
                 await saveTestResult(resultType, user?.id ?? null)
+                const { error } = await supabase.from('users').update({ result_type: resultType }).eq('id', user?.id)
+                if (error) {
+                    console.error('테스트 결과 저장 실패:', error)
+                }
                 console.log('저장 성공')
             } catch (error) {
                 console.error('테스트 결과 저장 실패', error)
@@ -101,7 +106,9 @@ export const TestPage: React.FC = () => {
                 <div className="flex-1 px-4">
                     <ProgressBar current={currentIndex + 1} total={questions.length} />
                 </div>
-                <div className="w-10" /> {/* Spacer for balance */}
+                <button onClick={() => navigate('/')} className="p-2 -mr-2 text-text-muted hover:text-text transition-colors">
+                    <HomeIcon className="w-6 h-6" />
+                </button>
             </div>
 
             <div className="flex-1 relative flex flex-col justify-center">
@@ -126,10 +133,9 @@ export const TestPage: React.FC = () => {
                             className="w-full h-full object-cover rounded-2xl mb-6"
                         />
                         {/* currentQuestion.text → currentQuestion.question 으로 변경 (새 Question 타입 구조) */}
-                        <h2 className="text-2xl font-bold text-text mb-10 text-center text-balance leading-relaxed">
+                        <h2 className="text-2xl font-bold text-text mb-10 text-center break-keep leading-relaxed">
                             {currentQuestion.question}
                         </h2>
-
                         <div className="space-y-4">
                             {currentQuestion.options.map((option, idx) => (
                                 <Card

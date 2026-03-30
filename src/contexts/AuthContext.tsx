@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import React, { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
 interface AuthContextType {
@@ -39,9 +39,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
+    const ensureUserProfile = async (user: User) => {
+        const { error } = await supabase.from('users').upsert(
+            {
+                id: user.id,
+                nickname:
+                    user.user_metadata?.nickname ||
+                    user.user_metadata?.name ||
+                    user.user_metadata?.full_name ||
+                    user.user_metadata?.user_name ||
+                    user.email?.split('@')[0] ||
+                    '사용자',
+                avatar_url:
+                    user.user_metadata?.avatar_url ||
+                    user.user_metadata?.picture ||
+                    user.user_metadata?.profile_image ||
+                    null,
+            },
+            {
+                onConflict: 'id',
+                ignoreDuplicates: true,
+            },
+        )
+
+        if (error) {
+            console.error('users 프로필 보정 실패:', error)
+        }
+    }
+
     useEffect(() => {
         const initializeAuth = async () => {
             try {
+                setIsLoading(true)
+
                 const {
                     data: { session },
                     error,
@@ -53,8 +83,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                 setSession(session)
                 setUser(session?.user ?? null)
+                setIsLoading(false)
+
+                if (session?.user) {
+                    ensureUserProfile(session.user)
+                }
             } catch (error) {
                 console.error('초기 인증 상태 확인 중 오류:', error)
+                setSession(null)
+                setUser(null)
             } finally {
                 setIsLoading(false)
             }
@@ -64,10 +101,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('auth state change:', event, session)
+
             setSession(session)
             setUser(session?.user ?? null)
             setIsLoading(false)
+
+            if (session?.user) {
+                ensureUserProfile(session.user)
+            }
         })
 
         return () => {
@@ -86,6 +129,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         })
 
         if (error) {
+            console.error('카카오 로그인 실패:', error)
             throw error
         }
     }
