@@ -1,4 +1,4 @@
-import { BookmarkIcon, CheckIcon, HeartIcon, MessageCircleIcon, PencilIcon, XIcon } from 'lucide-react'
+import { BookmarkIcon, CheckIcon, HeartIcon, MessageCircleIcon, PencilIcon, TrashIcon, XIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { resultTypes } from '../../../data/mockData'
 import { Post } from '../../../services/testPostApi'
@@ -11,6 +11,7 @@ interface PostContentProps {
     onLikeClick: (e: React.MouseEvent) => void
     onBookmarkClick: (e: React.MouseEvent) => void
     onEditPost?: (title: string, content: string) => Promise<void>
+    onDeletePost?: () => Promise<void>
 }
 
 export const PostContent: React.FC<PostContentProps> = ({
@@ -21,6 +22,7 @@ export const PostContent: React.FC<PostContentProps> = ({
     onLikeClick,
     onBookmarkClick,
     onEditPost,
+    onDeletePost,
 }) => {
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
 
@@ -73,13 +75,22 @@ export const PostContent: React.FC<PostContentProps> = ({
                         </div>
                     </div>
                     {isAuthor && !isEditing && (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-primary transition-colors px-3 py-1.5 rounded-full border border-gray-200 hover:border-primary"
-                        >
-                            <PencilIcon className="w-3.5 h-3.5" />
-                            수정
-                        </button>
+                        <div className="flex gap-2 mb-6 justify-between">
+                            <button
+                                onClick={onDeletePost}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-red-200 text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                            >
+                                <TrashIcon className="w-3.5 h-3.5" />
+                                삭제
+                            </button>
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="flex items-center gap-1.5 text-xs text-text-muted hover:text-primary transition-colors px-3 py-1.5 rounded-full border border-gray-200 hover:border-primary"
+                            >
+                                <PencilIcon className="w-3.5 h-3.5" />
+                                수정
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

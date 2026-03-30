@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
 import {
@@ -39,6 +39,9 @@ export const DetailPostPage: React.FC = () => {
     // 게시물 수정 관련 상태
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
     const [editingCommentContent, setEditingCommentContent] = useState('')
+
+    // 게시물 삭제시 목록으로 이동
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -95,6 +98,17 @@ export const DetailPostPage: React.FC = () => {
         const { error } = await supabase.from('posts').update({ title, content }).eq('id', postId)
         if (!error) {
             setPost((prev) => (prev ? { ...prev, title, content } : prev))
+        }
+    }
+
+    // 게시물 삭제 핸들러
+    const handleDeletePost = async () => {
+        if (!postId) return
+        const confirmed = window.confirm('게시물을 삭제하시겠습니까?')
+        if (!confirmed) return
+        const { error } = await supabase.from('posts').delete().eq('id', postId)
+        if (!error) {
+            navigate('/community')
         }
     }
 
@@ -203,6 +217,16 @@ export const DetailPostPage: React.FC = () => {
         setEditingCommentContent('')
     }
 
+    const handleCommentDelete = async (commentId: string) => {
+        const confirmed = window.confirm('댓글을 삭제하시겠습니까?')
+        if (!confirmed) return
+        const { error } = await supabase.from('comments').delete().eq('id', commentId)
+        if (!error) {
+            setLocalComments((prev) => prev.filter((c) => c.id !== commentId))
+            setPost((prev) => (prev ? { ...prev, comment_count: prev.comment_count - 1 } : prev))
+        }
+    }
+
     return (
         <div>
             <div className="p-6">
@@ -214,6 +238,7 @@ export const DetailPostPage: React.FC = () => {
                     onEditPost={handleEditPost}
                     onLikeClick={handleLikeClick}
                     onBookmarkClick={handleBookmarkClick}
+                    onDeletePost={handleDeletePost}
                 />
                 <CommentList
                     comments={localComments}
@@ -225,6 +250,7 @@ export const DetailPostPage: React.FC = () => {
                     onCommentEditCancel={handleCommentEditCancel}
                     onCommentEditSave={handleCommentEditSave}
                     onEditContentChange={setEditingCommentContent}
+                    onCommentDelete={handleCommentDelete}
                 />
             </div>
             <CommentInput comment={comment} onCommentChange={setComment} onSubmit={handleCommentSubmit} />

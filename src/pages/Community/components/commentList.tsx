@@ -1,4 +1,4 @@
-import { CheckIcon, PencilIcon, XIcon } from 'lucide-react'
+import { CheckIcon, PencilIcon, TrashIcon, XIcon } from 'lucide-react'
 import React from 'react'
 
 interface Comment {
@@ -22,6 +22,7 @@ interface CommentListProps {
     onCommentEditSave: (commentId: string) => void
     canEditComment: (comment: Comment) => boolean
     onEditContentChange: (content: string) => void
+    onCommentDelete: (commentId: string) => void
 }
 
 export const CommentList: React.FC<CommentListProps> = ({
@@ -34,6 +35,7 @@ export const CommentList: React.FC<CommentListProps> = ({
     onCommentEditSave,
     canEditComment,
     onEditContentChange,
+    onCommentDelete,
 }) => {
     return (
         <div className="px-6 py-6 bg-gray-50 min-h-[300px]">
@@ -82,6 +84,13 @@ export const CommentList: React.FC<CommentListProps> = ({
                                                 autoFocus
                                             />
                                             <div className="flex gap-2 justify-end mt-2">
+                                                <button
+                                                    onClick={() => onCommentDelete?.(comment.id)}
+                                                    className="flex items-center gap-1 px-3 py-1 rounded-full border border-red-200 text-xs text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                >
+                                                    <TrashIcon className="w-3 h-3" />
+                                                    삭제
+                                                </button>
                                                 <button
                                                     onClick={onCommentEditCancel}
                                                     className="flex items-center gap-1 px-3 py-1 rounded-full border border-gray-200 text-xs text-gray-500 hover:bg-gray-50"
