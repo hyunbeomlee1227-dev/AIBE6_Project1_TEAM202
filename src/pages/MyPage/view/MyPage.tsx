@@ -28,7 +28,7 @@ type Bookmark = {
     id: string
     user_id: string
     place_name: string
-    //post_id: string | null
+    post_id: string | null
     created_at: string
 }
 
@@ -39,14 +39,7 @@ export const MyPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'bookmarks' | 'posts'>('bookmarks')
     const [profile, setProfile] = useState<Profile | null>(null)
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
-
-    const mockPosts = useMemo(
-        () => [
-            { id: 1, title: '혼자 다녀온 부산 여행 후기' },
-            { id: 2, title: '제주 렌터카 없이 여행하는 법' },
-        ],
-        [],
-    )
+    const [myPosts, setMyPosts] = useState<any[]>([])
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -81,7 +74,7 @@ export const MyPage: React.FC = () => {
 
             const { data, error } = await supabase
                 .from('bookmarks')
-                .select('id, user_id, place_name, created_at')
+                .select('id, user_id, place_name, post_id, created_at')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
 
@@ -94,6 +87,27 @@ export const MyPage: React.FC = () => {
         }
 
         fetchBookmarks()
+    }, [user])
+
+    useEffect(() => {
+        const fetchMyPosts = async () => {
+            if (!user) return
+
+            const { data, error } = await supabase
+                .from('posts')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+
+            if (error) {
+                console.error('내 게시글 조회 실패:', error)
+                return
+            }
+
+            setMyPosts(data ?? [])
+        }
+
+        fetchMyPosts()
     }, [user])
 
     const handleDeleteBookmark = async (bookmarkId: string) => {
@@ -109,6 +123,21 @@ export const MyPage: React.FC = () => {
         }
 
         setBookmarks((prev) => prev.filter((item) => item.id !== bookmarkId))
+    }
+
+    const handleDeletePost = async (postId: string) => {
+        const ok = window.confirm('이 게시글을 삭제할까요?')
+        if (!ok) return
+
+        const { error } = await supabase.from('posts').delete().eq('id', postId)
+
+        if (error) {
+            console.error('게시글 삭제 실패:', error)
+            alert('게시글 삭제에 실패했습니다.')
+            return
+        }
+
+        setMyPosts((prev) => prev.filter((item) => item.id !== postId))
     }
 
     const handleLogout = async () => {
@@ -174,7 +203,7 @@ export const MyPage: React.FC = () => {
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <h1 className="text-2xl font-bold text-text truncate">{nickname}</h1>
+                            <h1 className="text-xl font-bold text-text truncate">{nickname}</h1>
 
                             <button
                                 type="button"
@@ -190,7 +219,7 @@ export const MyPage: React.FC = () => {
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 mt-3">
                             <UserIcon className="w-4 h-4 text-text-muted" />
-                            <span className="text-sm font-bold text-text">
+                            <span className="text-xs font-semibold text-text">
                                 {' '}
                                 {profile?.result_type ? typeLabel[profile.result_type] : '테스트를 진행하세요!'}
                             </span>
@@ -223,7 +252,7 @@ export const MyPage: React.FC = () => {
                         type="button"
                         onClick={() => setActiveTab('bookmarks')}
                         className={`py-2.5 rounded-xl text-sm font-bold transition-colors ${
-                            activeTab === 'bookmarks' ? 'bg-white text-text shadow-sm' : 'text-text-muted'
+                            activeTab === 'bookmarks' ? 'bg-white text-text' : 'text-text-muted'
                         }`}
                     >
                         저장한 장소
@@ -232,7 +261,7 @@ export const MyPage: React.FC = () => {
                         type="button"
                         onClick={() => setActiveTab('posts')}
                         className={`py-2.5 rounded-xl text-sm font-bold transition-colors ${
-                            activeTab === 'posts' ? 'bg-white text-text shadow-sm' : 'text-text-muted'
+                            activeTab === 'posts' ? 'bg-white text-text' : 'text-text-muted'
                         }`}
                     >
                         내 게시글
@@ -242,16 +271,21 @@ export const MyPage: React.FC = () => {
 
             <div className="px-6 space-y-3">
                 {activeTab === 'bookmarks' && bookmarks.length === 0 && (
-                    <Card className="p-4">
-                        <p className="text-sm text-text-muted text-center">저장한 장소가 없습니다.</p>
+                    <Card className="p-6 text-center">
+                        <BookmarkIcon className="w-6 h-6 mx-auto text-gray-300 mb-2" />
+                        <p className="text-sm text-text-muted">저장한 장소가 없습니다.</p>
                     </Card>
                 )}
 
                 {activeTab === 'bookmarks' &&
                     bookmarks.map((item) => (
-                        <Card key={item.id} className="p-4">
+                        <Card
+                            key={item.id}
+                            className="p-4 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer"
+                            onClick={() => navigate(`/community/${item.post_id}`)}
+                        >
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                                <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
                                     <BookmarkIcon className="w-5 h-5 text-text-muted" />
                                 </div>
 
@@ -264,7 +298,11 @@ export const MyPage: React.FC = () => {
 
                                 <button
                                     type="button"
-                                    onClick={() => handleDeleteBookmark(item.id)}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        handleDeleteBookmark(item.id)
+                                    }}
                                     className="text-sm text-red-500 hover:text-red-600 shrink-0"
                                 >
                                     삭제
@@ -273,17 +311,54 @@ export const MyPage: React.FC = () => {
                         </Card>
                     ))}
 
+                {activeTab === 'posts' && myPosts.length === 0 && (
+                    <Card className="p-4">
+                        <p className="text-sm text-text-muted text-center">작성한 게시글이 없습니다.</p>
+                    </Card>
+                )}
+
                 {activeTab === 'posts' &&
-                    mockPosts.map((item) => (
-                        <Card key={item.id} className="p-4">
+                    myPosts.map((item) => (
+                        <Card
+                            key={item.id}
+                            className="p-4 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer"
+                            onClick={() => navigate(`/community/${item.id}`)}
+                        >
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                                    <MapPinIcon className="w-5 h-5 text-text-muted" />
-                                </div>
-                                <div className="min-w-0">
-                                    <h3 className="font-bold text-text">{item.title}</h3>
-                                    <p className="text-sm text-text-muted mt-1">
-                                        실제 게시글 데이터 연결 전 임시 영역입니다.
+                                {item.image_url ? (
+                                    <img
+                                        src={item.image_url}
+                                        alt={item.title}
+                                        className="w-16 h-16 rounded-xl object-cover shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                                        <MapPinIcon className="w-5 h-5 text-text-muted" />
+                                    </div>
+                                )}
+
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <h3 className="font-bold text-text text-base truncate">{item.title}</h3>
+
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                handleDeletePost(item.id)
+                                            }}
+                                            className="text-sm text-red-500 hover:text-red-600 shrink-0"
+                                        >
+                                            삭제
+                                        </button>
+                                    </div>
+
+                                    <p className="text-sm text-text-muted mt-1 line-clamp-2">
+                                        {item.content || '내용이 없습니다.'}
+                                    </p>
+                                    <p className="text-xs text-text-muted mt-2">
+                                        {new Date(item.created_at).toLocaleDateString('ko-KR')}
                                     </p>
                                 </div>
                             </div>
@@ -291,7 +366,7 @@ export const MyPage: React.FC = () => {
                     ))}
             </div>
 
-            <div className="px-6 mt-8">
+            <div className="px-6 mt-10 space-y-3">
                 <button
                     type="button"
                     onClick={handleLogout}
