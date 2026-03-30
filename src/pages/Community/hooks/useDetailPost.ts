@@ -38,7 +38,7 @@ export const useDetailPost = () => {
     const [isLiked, setIsLiked] = useState(false)
     const [isBookmarked, setIsBookmarked] = useState(false)
 
-    const commentEditor = useCommentEditor(setLocalComments, setPost)
+    const commentEditor = useCommentEditor(setLocalComments, postId)
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -121,7 +121,6 @@ export const useDetailPost = () => {
             setComment('')
             const data = await getComments(postId)
             setLocalComments(convertComments(data))
-            setPost((prev) => (prev ? { ...prev, comment_count: prev.comment_count + 1 } : prev))
         } catch (error) {
             console.error('댓글 저장 실패:', error)
         }
