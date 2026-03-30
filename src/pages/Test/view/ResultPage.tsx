@@ -3,18 +3,12 @@ import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PlaceCard } from '../../../components/PlaceCard'
 import { LoadingSpinner } from '../../../components/shared/LoadingSpinner'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { resultTypes, TravelType } from '../../../data/mockData'
+import { Place, resultTypes, TravelType } from '../../../data/mockData'
 import { requestGemini } from '../../../data/test/api'
-import KakaoMap from './Map'
-
-interface Place {
-    name: string
-    location: string
-    description: string
-}
 
 export const ResultPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true)
@@ -28,7 +22,6 @@ export const ResultPage: React.FC = () => {
     useEffect(() => {
         requestGemini(result.title)
             .then((res) => {
-                console.log(res)
                 setRecommendedPlaces(res)
                 console.log('제미나이 호출 성공')
             })
@@ -43,8 +36,6 @@ export const ResultPage: React.FC = () => {
             navigate('/')
         }
     }, [result, navigate])
-
-    console.log(recommendedPlaces)
 
     if (isLoading) return <LoadingSpinner />
     if (!result) return null
@@ -152,9 +143,9 @@ export const ResultPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-text">이런 곳은 어때요?</h2>
                     </div>
 
-                    <div>
+                    <div className="flex flex-col gap-[20px]">
                         {recommendedPlaces!.map((place, index) => (
-                            <KakaoMap key={`${place.name}-${index}`} name={place.name} />
+                            <PlaceCard key={`${place.name}-${place.tags[index]}`} place={place} />
                         ))}
                     </div>
                 </motion.div>
