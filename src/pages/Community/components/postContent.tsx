@@ -35,7 +35,6 @@ export const PostContent: React.FC<PostContentProps> = ({
     isBookmarked,
     currentUserId,
     commentCount,
-    editedImageFile,
     editedImagePreview,
     onLikeClick,
     onBookmarkClick,
