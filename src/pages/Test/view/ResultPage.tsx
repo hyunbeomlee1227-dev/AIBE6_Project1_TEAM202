@@ -22,13 +22,20 @@ export const ResultPage: React.FC = () => {
             navigate('/')
         }
 
-        const fetchData = async () => {
+        const fetchData = async (retries = 3, delay = 1000) => {
             try {
                 const res = await requestGemini(result!.title)
                 setRecommendedPlaces(res)
             } catch (err) {
                 if (process.env.NODE_ENV === 'development') {
                     console.error(err)
+                }
+
+                if (retries > 0) {
+                    await new Promise((resolve) => setTimeout(resolve, delay))
+                    return fetchData(retries - 1, delay)
+                } else {
+                    console.error('모든 재시도 실패')
                 }
             } finally {
                 setIsLoading(false)
