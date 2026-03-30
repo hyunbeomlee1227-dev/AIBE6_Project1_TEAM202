@@ -1,5 +1,15 @@
-import { BookmarkIcon, CheckIcon, HeartIcon, MessageCircleIcon, PencilIcon, TrashIcon, XIcon } from 'lucide-react'
+import {
+    BookmarkIcon,
+    CheckIcon,
+    ChevronLeftIcon,
+    HeartIcon,
+    MessageCircleIcon,
+    PencilIcon,
+    TrashIcon,
+    XIcon,
+} from 'lucide-react'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { resultTypes } from '../../../data/mockData'
 import { Post } from '../../../services/testPostApi'
 import { usePostEdit } from '../hooks/usePostEdit'
@@ -9,6 +19,7 @@ interface PostContentProps {
     isLiked: boolean
     isBookmarked: boolean
     currentUserId?: string | null
+    commentCount: number
     onLikeClick: (e: React.MouseEvent) => void
     onBookmarkClick: (e: React.MouseEvent) => void
     onEditPost?: (title: string, content: string) => Promise<void>
@@ -20,11 +31,13 @@ export const PostContent: React.FC<PostContentProps> = ({
     isLiked,
     isBookmarked,
     currentUserId,
+    commentCount,
     onLikeClick,
     onBookmarkClick,
     onEditPost,
     onDeletePost,
 }) => {
+    const navigate = useNavigate()
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
     const isAuthor = !!currentUserId && currentUserId === post.user_id
 
@@ -41,8 +54,22 @@ export const PostContent: React.FC<PostContentProps> = ({
         handleCancel,
     } = usePostEdit(post, onEditPost)
 
+    const handleGoBack = () => {
+        navigate('/community')
+    }
+
     return (
         <div>
+            {/* 뒤로가기 버튼 */}
+            <div className="mb-4">
+                <button
+                    onClick={handleGoBack}
+                    className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors"
+                >
+                    <ChevronLeftIcon className="w-4 h-4" />
+                    뒤로가기
+                </button>
+            </div>
             {/* 작성자 영역 버튼 분리 */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -152,7 +179,7 @@ export const PostContent: React.FC<PostContentProps> = ({
                     </button>
                     <div className="flex items-center gap-1.5 text-text">
                         <MessageCircleIcon className="w-6 h-6" />
-                        <span className="font-medium">{post.comment_count}</span>
+                        <span className="font-medium">{commentCount}</span>
                     </div>
                 </div>
                 <button
