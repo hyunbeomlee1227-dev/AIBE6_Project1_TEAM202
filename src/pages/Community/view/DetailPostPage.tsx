@@ -58,6 +58,7 @@ export const DetailPostPage: React.FC = () => {
                     isLiked={isLiked}
                     isBookmarked={isBookmarked}
                     currentUserId={currentUserId}
+                    commentCount={localComments.length}
                     onEditPost={handleEditPost}
                     onLikeClick={handleLikeClick}
                     onBookmarkClick={handleBookmarkClick}
@@ -65,7 +66,6 @@ export const DetailPostPage: React.FC = () => {
                 />
                 <CommentList
                     comments={localComments}
-                    commentCount={localComments.length}
                     editingCommentId={editingCommentId}
                     editingCommentContent={editingCommentContent}
                     canEditComment={canEditComment}

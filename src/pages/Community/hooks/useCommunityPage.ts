@@ -17,19 +17,26 @@ export const useCommunityPage = () => {
     const [bookmarkedPostIds, setBookmarkedPostIds] = useState<string[]>([])
     const [sortType, setSortType] = useState<PostSortType>('latest')
 
+    const [fetchTrigger] = useState(() => Date.now())
+
     useEffect(() => {
+        let cancelled = false
         const fetchPosts = async () => {
+            setIsLoading(true)
             try {
                 const posts = await getPosts(sortType, activeFilter)
-                setAllPosts(posts)
+                if (!cancelled) setAllPosts(posts)
             } catch (error) {
                 console.error('불러오기 실패:', error)
             } finally {
-                setIsLoading(false)
+                if (!cancelled) setIsLoading(false)
             }
         }
         fetchPosts()
-    }, [sortType, activeFilter])
+        return () => {
+            cancelled = true
+        }
+    }, [sortType, activeFilter, fetchTrigger])
 
     // 좋아요, 북마크 상태변화 통합
     useEffect(() => {

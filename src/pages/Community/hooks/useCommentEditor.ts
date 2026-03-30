@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../../../lib/supabase'
-import { Post } from '../../../services/testPostApi'
 import { LocalComment } from '../types/comment'
 
 export const useCommentEditor = (
     setLocalComments: React.Dispatch<React.SetStateAction<LocalComment[]>>,
-    setPost: React.Dispatch<React.SetStateAction<Post | null>>,
+    postId: string | undefined,
 ) => {
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
     const [editingCommentContent, setEditingCommentContent] = useState('')
@@ -42,10 +41,13 @@ export const useCommentEditor = (
     const handleDelete = async (commentId: string) => {
         const confirmed = window.confirm('댓글을 삭제하시겠습니까?')
         if (!confirmed) return
+
         const { error } = await supabase.from('comments').delete().eq('id', commentId)
         if (!error) {
             setLocalComments((prev) => prev.filter((c) => c.id !== commentId))
-            setPost((prev) => (prev ? { ...prev, comment_count: prev.comment_count - 1 } : prev))
+            if (postId) {
+                await supabase.rpc('decrement_comment_count', { post_id: postId })
+            }
         }
     }
 
