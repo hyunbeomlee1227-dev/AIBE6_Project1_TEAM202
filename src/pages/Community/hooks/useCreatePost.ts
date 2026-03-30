@@ -52,6 +52,7 @@ export const useCreatePost = () => {
         }
     }
 
+    // 폼 상태 관리, 게시글 업로드 처리 핸들러
     return {
         // 상태
         title,

@@ -130,6 +130,7 @@ export const useDetailPost = () => {
     const canEditComment = (c: LocalComment) =>
         !!user?.id && !!post && (user.id === c.userId || user.id === post.user_id)
 
+    // 게시글 댓글 좋아요 북마크 상태관리, 게시글 수정 삭제 핸들러
     return {
         // 상태
         post,

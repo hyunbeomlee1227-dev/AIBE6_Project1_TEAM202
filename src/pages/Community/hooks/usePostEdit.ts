@@ -24,6 +24,7 @@ export const usePostEdit = (post: Post, onEditPost?: (title: string, content: st
         setIsEditing(false)
     }
 
+    // 게시물 수정 커스텀 훅
     return {
         isEditing,
         editedTitle,

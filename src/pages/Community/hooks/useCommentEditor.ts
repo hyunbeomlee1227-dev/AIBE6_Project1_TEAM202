@@ -49,6 +49,7 @@ export const useCommentEditor = (
         }
     }
 
+    // 댓글 편집 커스텀 훅
     return {
         editingCommentId,
         editingCommentContent,

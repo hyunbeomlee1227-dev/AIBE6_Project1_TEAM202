@@ -28,6 +28,7 @@ export const PostContent: React.FC<PostContentProps> = ({
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
     const isAuthor = !!currentUserId && currentUserId === post.user_id
 
+    // 게시물 Edit 커스텀 훅 호출
     const {
         isEditing,
         editedTitle,
@@ -42,7 +43,7 @@ export const PostContent: React.FC<PostContentProps> = ({
 
     return (
         <div>
-            {/* 작성자 영역 + 액션 버튼 */}
+            {/* 작성자 영역 버튼 분리 */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
@@ -118,7 +119,7 @@ export const PostContent: React.FC<PostContentProps> = ({
                 <p className="text-text leading-relaxed mb-6 whitespace-pre-wrap">{post.content}</p>
             )}
 
-            {/* 편집 액션 */}
+            {/* 게시글 수정 완료 버튼 */}
             {isEditing && (
                 <div className="flex gap-2 mb-6 justify-end">
                     <button

@@ -31,6 +31,7 @@ export const useCommunityPage = () => {
         fetchPosts()
     }, [sortType, activeFilter])
 
+    // 좋아요, 북마크 상태변화 통합
     useEffect(() => {
         const fetchUserActions = async () => {
             if (!user) {
@@ -74,6 +75,7 @@ export const useCommunityPage = () => {
         )
     }
 
+    // 북마크 supabase 직접 호출
     const handleBookmarkClick = async (postId: string) => {
         if (!isAuthenticated || !user?.id) {
             setIsLoginModalOpen(true)
@@ -108,6 +110,7 @@ export const useCommunityPage = () => {
         navigate('/login', { state: { from: '/community' } })
     }
 
+    // 게시물 불러오기, 좋아요 북마크 상태관리, 글쓰기 클릭 로그인 모달 핸들러
     return {
         // 상태
         isLoading,
