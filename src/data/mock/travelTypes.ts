@@ -3,7 +3,7 @@ import type { TravelType } from '../models/travelType'
 
 export const travelTypes: TravelType[] = [
     {
-        id: 'healing',
+        id: 'HEALING',
         title: '감성 힐링',
         emoji: '🌿',
         icon: HeartIcon,
@@ -11,7 +11,7 @@ export const travelTypes: TravelType[] = [
         color: 'bg-green-100 text-green-700',
     },
     {
-        id: 'shopping',
+        id: 'SHOPPING',
         title: '도시 탐험',
         emoji: '🛍',
         icon: MapIcon,
@@ -19,7 +19,7 @@ export const travelTypes: TravelType[] = [
         color: 'bg-purple-100 text-purple-700',
     },
     {
-        id: 'foodie',
+        id: 'FOOD',
         title: '맛집 투어',
         emoji: '🍜',
         icon: UtensilsIcon,
@@ -27,7 +27,7 @@ export const travelTypes: TravelType[] = [
         color: 'bg-orange-100 text-orange-700',
     },
     {
-        id: 'photo',
+        id: 'PHOTO',
         title: '포토 여행',
         emoji: '📸',
         icon: CameraIcon,
@@ -35,7 +35,7 @@ export const travelTypes: TravelType[] = [
         color: 'bg-pink-100 text-pink-700',
     },
     {
-        id: 'calm',
+        id: 'CALM',
         title: '고요 힐링',
         emoji: '🧘',
         icon: SparklesIcon,
@@ -43,7 +43,7 @@ export const travelTypes: TravelType[] = [
         color: 'bg-gray-100 text-gray-700',
     },
     {
-        id: 'explorer',
+        id: 'EXPLORER',
         title: '모험 여행',
         emoji: '🧭',
         icon: CompassIcon,

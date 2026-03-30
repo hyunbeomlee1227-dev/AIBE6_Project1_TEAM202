@@ -9,6 +9,7 @@ import { RouteIndicator } from './components/shared/RouteIndicator'
 import { HomePage } from './pages/Home/view/HomePage'
 import { LoginPage } from './pages/MyPage/view/LoginPage'
 import { MyPage } from './pages/MyPage/view/MyPage'
+import { EditProfile } from '../src/pages/MyPage/view/EditProfile'
 import { SignupPage } from './pages/MyPage/view/SignupPage'
 import { ResultPage } from './pages/Test/view/ResultPage'
 import { TestPage } from './pages/Test/view/TestPage'
@@ -31,6 +32,7 @@ export function App() {
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/signup" element={<SignupPage />} />
                                 <Route path="/my" element={<MyPage />} />
+                                <Route path="/my/edit-profile" element={<EditProfile />} />
                                 <Route path="/create-post" element={<CreatePostPage />} />
                             </Routes>
                         </div>
