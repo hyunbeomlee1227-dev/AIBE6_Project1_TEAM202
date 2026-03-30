@@ -25,9 +25,20 @@ export const PostContent: React.FC<PostContentProps> = ({
             {/* 작성자 정보 - author 없으므로 travel_type으로 대체 */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-xl">
-                        {travelTypeInfo?.emoji ?? '✈️'}
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                        {post.author?.avatar_url ? (
+                            <img
+                                src={post.author.avatar_url}
+                                alt={post.author.nickname}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xl">
+                                {travelTypeInfo?.emoji ?? '✈️'}
+                            </div>
+                        )}
                     </div>
+                    <div className="font-bold text-text text-sm">{post.author?.nickname ?? '알 수 없는 사용자'}</div>
                     <div>
                         <div className="text-xs text-text-muted flex items-center gap-1">
                             <span>{travelTypeInfo?.emoji}</span>
@@ -37,7 +48,7 @@ export const PostContent: React.FC<PostContentProps> = ({
                 </div>
             </div>
 
-            {/* 게시글 내용 */}
+            {/* 게시글 제목 */}
             <h1 className="text-2xl font-bold text-text mb-4">{post.title}</h1>
 
             {/* 이미지 영역 */}
@@ -47,7 +58,9 @@ export const PostContent: React.FC<PostContentProps> = ({
                 </div>
             )}
 
+            {/* 게시글 내용 */}
             <p className="text-text leading-relaxed mb-6 whitespace-pre-wrap">{post.content}</p>
+
             {/* 하단 인터랙션 바 */}
             <div className="flex items-center justify-between py-4 border-y border-gray-100">
                 <div className="flex gap-6">
