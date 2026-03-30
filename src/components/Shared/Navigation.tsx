@@ -4,13 +4,19 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 
+// 하단 네비게이션 컴포넌트
+// 현재 경로와 로그인 상태에 따라 탭 이동 및 표시를 제어
 export const BottomNav: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const { user, isAuthenticated } = useAuth()
     const [navProfileImage, setNavProfileImage] = useState<string | null>(null)
 
+    // 하단 네비게이션을 숨길 경로 목록
+    // 로그인/회원가입/글작성/테스트 페이지에서는 노출하지 않음
     const hiddenPaths = ['/test', '/login', '/signup', '/create-post']
+
+    // 현재 경로가 숨김 대상인지 확인
     const shouldHideNav = hiddenPaths.some((path) => location.pathname.startsWith(path))
 
     useEffect(() => {
@@ -35,6 +41,7 @@ export const BottomNav: React.FC = () => {
 
     if (shouldHideNav) return null
 
+    // 하단 탭에 표시할 메뉴 목록
     const navItems = [
         {
             path: '/',
@@ -58,6 +65,8 @@ export const BottomNav: React.FC = () => {
         },
     ]
 
+    // 네비게이션 이동 처리
+    // 비로그인 상태에서 마이페이지 접근 시 로그인 페이지로 보냄
     const handleNavigate = (path: string) => {
         if (path === '/my' && !isAuthenticated) {
             navigate('/login', {
@@ -75,6 +84,7 @@ export const BottomNav: React.FC = () => {
                 const isActive =
                     location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))
 
+                // 로그인 상태에서는 마이 탭 아이콘 대신 프로필 이미지를 표시
                 if (item.path === '/my' && isAuthenticated && user) {
                     return (
                         <button
