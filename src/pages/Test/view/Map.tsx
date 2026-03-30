@@ -55,7 +55,7 @@ export default function KakaoMap({ name }: KakaoMapProps) {
     }, [map, name, loading])
 
     if (loading) return <div>로딩중...</div>
-    if (error) return console.log(error)
+    if (error) return <div>에러 발생</div>
 
     return (
         <div className="relative w-full h-[350px] overflow-hidden transition-transform duration-500 hover:scale-110">
