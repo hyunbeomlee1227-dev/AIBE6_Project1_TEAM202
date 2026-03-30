@@ -1,14 +1,40 @@
 import { CompassIcon, HomeIcon, UserIcon, UsersIcon } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
+
 export const BottomNav: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
-    const { user, isAuthenticated, profileImage } = useAuth()
-    // Hide nav on specific pages
+    const { user, isAuthenticated } = useAuth()
+    const [navProfileImage, setNavProfileImage] = useState<string | null>(null)
+
     const hiddenPaths = ['/test', '/login', '/signup', '/create-post']
-    if (hiddenPaths.some((path) => location.pathname.startsWith(path))) return null
+    const shouldHideNav = hiddenPaths.some((path) => location.pathname.startsWith(path))
+
+    useEffect(() => {
+        const fetchNavProfileImage = async () => {
+            if (!user) {
+                setNavProfileImage(null)
+                return
+            }
+
+            const { data, error } = await supabase.from('users').select('avatar_url').eq('id', user.id).single()
+
+            if (error) {
+                console.error('하단 프로필 이미지 조회 실패:', error)
+                return
+            }
+
+            setNavProfileImage(data?.avatar_url ?? null)
+        }
+
+        fetchNavProfileImage()
+    }, [user, location.pathname])
+
+    if (shouldHideNav) return null
+
     const navItems = [
         {
             path: '/',
@@ -48,7 +74,7 @@ export const BottomNav: React.FC = () => {
             {navItems.map((item) => {
                 const isActive =
                     location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))
-                // Custom render for My Page avatar
+
                 if (item.path === '/my' && isAuthenticated && user) {
                     return (
                         <button
@@ -57,10 +83,12 @@ export const BottomNav: React.FC = () => {
                             className="flex flex-col items-center p-2 transition-colors"
                         >
                             <div
-                                className={`w-6 h-6 mb-1 rounded-full overflow-hidden border-2 transition-colors ${isActive ? 'border-primary' : 'border-transparent'}`}
+                                className={`w-6 h-6 mb-1 rounded-full overflow-hidden border-2 transition-colors ${
+                                    isActive ? 'border-primary' : 'border-transparent'
+                                }`}
                             >
                                 <img
-                                    src={profileImage || 'https://i.pravatar.cc/100?img=12'}
+                                    src={navProfileImage || 'https://i.pravatar.cc/100?img=12'}
                                     alt="Profile"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -74,14 +102,16 @@ export const BottomNav: React.FC = () => {
                         </button>
                     )
                 }
+
                 return (
                     <button
                         key={item.path}
                         onClick={() => handleNavigate(item.path)}
-                        className={`flex flex-col items-center p-2 transition-colors ${isActive ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`flex flex-col items-center p-2 transition-colors ${
+                            isActive ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
+                        }`}
                     >
                         <item.icon className={`w-6 h-6 mb-1 ${isActive ? 'fill-primary/20' : ''}`} />
-
                         <span className="text-[10px] font-medium">{item.label}</span>
                     </button>
                 )

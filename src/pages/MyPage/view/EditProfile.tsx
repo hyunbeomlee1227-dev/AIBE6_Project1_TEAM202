@@ -96,6 +96,8 @@ export const EditProfile: React.FC = () => {
                 return
             }
 
+            await supabase.auth.refreshSession()
+
             alert('닉네임과 프로필이 저장되었습니다.')
             navigate('/my')
         } catch (error) {
