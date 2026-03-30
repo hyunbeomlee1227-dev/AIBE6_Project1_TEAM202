@@ -44,8 +44,6 @@ export const ResultPage: React.FC = () => {
         }
     }, [result, navigate])
 
-    console.log(recommendedPlaces)
-
     if (isLoading) return <LoadingSpinner />
     if (!result) return null
 
