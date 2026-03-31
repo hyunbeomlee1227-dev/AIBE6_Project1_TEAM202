@@ -69,11 +69,11 @@ export const useDetailPost = () => {
         fetchUserActions()
     }, [user?.id, postId])
 
-    const handleEditPost = async (title: string, content: string) => {
+    const handleEditPost = async (title: string, content: string, imageUrl: string) => {
         if (!postId) return
-        const { error } = await supabase.from('posts').update({ title, content }).eq('id', postId)
+        const { error } = await supabase.from('posts').update({ title, content, image_url: imageUrl }).eq('id', postId)
         if (!error) {
-            setPost((prev) => (prev ? { ...prev, title, content } : prev))
+            setPost((prev) => (prev ? { ...prev, title, content, image_url: imageUrl } : prev))
         }
     }
 
